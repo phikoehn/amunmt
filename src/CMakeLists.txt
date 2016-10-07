@@ -24,6 +24,7 @@ add_library(libcommon OBJECT
   common/scorer.cpp
   common/search.cpp
   common/sentence.cpp
+  common/translation_task.cpp
   common/processor/bpe.cpp
   common/utils.cpp
   common/vocab.cpp
