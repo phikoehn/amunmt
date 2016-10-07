@@ -10,10 +10,17 @@ class Search {
   private:
     std::vector<ScorerPtr> scorers_;
     Words filterIndices_;
+    const Sentence *sentence_;
 
   public:
     Search(size_t threadId);
+    virtual ~Search();
+
     size_t MakeFilter(const Words& srcWords, const size_t vocabSize);
-    History Decode(const Sentence& sentence);
+    void SetSource(const Sentence *sentence) {
+      sentence_ = sentence;
+    }
+
+    History Decode();
 
 };

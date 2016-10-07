@@ -3,6 +3,8 @@
 #include "search.h"
 
 History TranslationTask(const std::string& in, size_t taskCounter) {
+  Sentence *sentence = new Sentence(taskCounter, in);
+
 #ifdef __APPLE__
   static boost::thread_specific_ptr<Search> s_search;
   Search *search = s_search.get();
@@ -20,5 +22,6 @@ History TranslationTask(const std::string& in, size_t taskCounter) {
   }
 #endif
 
-  return search->Decode(Sentence(taskCounter, in));
+  search->SetSource(sentence);
+  return search->Decode();
 }
