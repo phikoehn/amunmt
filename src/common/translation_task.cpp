@@ -2,7 +2,7 @@
 #include "translation_task.h"
 #include "search.h"
 
-History TranslationTask(const std::string& in, size_t taskCounter) {
+Histories TranslationTask(const std::string& in, size_t taskCounter) {
   Sentence *sentence = new Sentence(taskCounter, in);
 
 #ifdef __APPLE__

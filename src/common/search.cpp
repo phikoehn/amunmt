@@ -22,7 +22,16 @@ Search::~Search()
   delete sentence_;
 }
 
-History Search::Decode() {
+Histories Search::Decode() {
+  Histories ret;
+
+  History history = Decode(sentence_);
+  ret.push_back(history);
+
+  return ret;
+}
+
+History Search::Decode(const Sentence *sentence) {
   boost::timer::cpu_timer timer;
 
   size_t beamSize = God::Get<size_t>("beam-size");

@@ -69,3 +69,6 @@ class History {
     std::priority_queue<HypothesisCoord> topHyps_;
     bool normalize_;  
 };
+
+///////////////////////////////////////////////////////////////////////////////
+typedef std::vector<History> Histories;

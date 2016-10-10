@@ -14,12 +14,14 @@ class Search {
       sentence_ = sentence;
     }
 
-    History Decode();
+    Histories Decode();
 
   private:
     size_t MakeFilter(const Words& srcWords, const size_t vocabSize);
     std::vector<ScorerPtr> scorers_;
     Words filterIndices_;
     const Sentence *sentence_;
+
+    History Decode(const Sentence *sentence);
 
 };

@@ -35,14 +35,14 @@ int main(int argc, char* argv[]) {
   if (God::Get<bool>("wipo")) {
     LOG(info) << "Reading input";
     while (std::getline(God::GetInputStream(), in)) {
-      History result = TranslationTask(in, taskCounter);
+      Histories result = TranslationTask(in, taskCounter);
       Printer(result, taskCounter++, std::cout);
     }
   } else {
     ThreadPool pool(totalThreads);
     LOG(info) << "Reading input";
 
-    std::vector<std::future<History>> results;
+    std::vector<std::future<Histories>> results;
 
     while(std::getline(God::GetInputStream(), in)) {
 

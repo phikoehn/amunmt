@@ -22,7 +22,7 @@ boost::python::list translate(boost::python::list& in) {
   LOG(info) << "Setting number of threads to " << threadCount;
 
   ThreadPool pool(threadCount);
-  std::vector<std::future<History>> results;
+  std::vector<std::future<Histories>> results;
 
   boost::python::list output;
   for(int i = 0; i < boost::python::len(in); ++i) {
