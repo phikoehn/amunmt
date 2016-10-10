@@ -19,14 +19,16 @@ size_t Search::MakeFilter(const Words& srcWords, const size_t vocabSize) {
 
 Search::~Search()
 {
-  delete sentence_;
 }
 
-Histories Search::Decode() {
+Histories Search::Decode(const Sentences &sentences) {
   Histories ret;
 
-  History history = Decode(sentence_);
-  ret.push_back(history);
+  for (size_t i = 0; i < sentences.size(); ++i) {
+    const Sentence *sentence = sentences[i];
+    History history = Decode(sentence);
+    ret.push_back(history);
+  }
 
   return ret;
 }
@@ -53,12 +55,12 @@ History Search::Decode(const Sentence *sentence) {
 
   bool filter = God::Get<std::vector<std::string>>("softmax-filter").size();
   if(filter) {
-    vocabSize = MakeFilter(sentence_->GetWords(), vocabSize);
+    vocabSize = MakeFilter(sentence->GetWords(), vocabSize);
   }
 
   for(size_t i = 0; i < scorers_.size(); i++) {
 	Scorer &scorer = *scorers_[i];
-	scorer.SetSource(*sentence_);
+	scorer.SetSource(*sentence);
 
 	states[i].reset(scorer.NewState());
 	nextStates[i].reset(scorer.NewState());
@@ -68,7 +70,7 @@ History Search::Decode(const Sentence *sentence) {
 	probs[i] = scorer.CreateMatrix();
   }
 
-  const size_t maxLength = sentence_->GetWords().size() * 3;
+  const size_t maxLength = sentence->GetWords().size() * 3;
   do {
 	for(size_t i = 0; i < scorers_.size(); i++) {
 		Scorer &scorer = *scorers_[i];
@@ -110,7 +112,7 @@ History Search::Decode(const Sentence *sentence) {
 
   } while(history.size() <= maxLength);
 
-  LOG(progress) << "Line " << sentence_->GetLine()
+  LOG(progress) << "Line " << sentence->GetLine()
 	<< ": Search took " << timer.format(3, "%ws");
 
   const State &nextState = *nextStates[0];

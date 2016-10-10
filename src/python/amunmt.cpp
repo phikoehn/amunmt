@@ -27,9 +27,14 @@ boost::python::list translate(boost::python::list& in) {
   boost::python::list output;
   for(int i = 0; i < boost::python::len(in); ++i) {
     std::string s = boost::python::extract<std::string>(boost::python::object(in[i]));
+    Sentence *sentence = new Sentence(i, s);
+    Sentences sentences;
+    sentences.push_back(sentence);
+
+
     results.emplace_back(
         pool.enqueue(
-            [=]{ return TranslationTask(s, i); }
+            [=]{ return TranslationTask(sentences, i); }
         )
     );
   }

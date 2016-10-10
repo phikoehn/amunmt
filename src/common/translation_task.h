@@ -2,5 +2,7 @@
 #include <string>
 #include "history.h"
 
-Histories TranslationTask(const std::string& in, size_t taskCounter);
+typedef  std::vector<const Sentence*> Sentences;
+
+Histories TranslationTask(const Sentences &sentences, size_t taskCounter);
 

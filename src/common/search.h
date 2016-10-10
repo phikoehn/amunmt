@@ -5,22 +5,19 @@
 #include "common/sentence.h"
 #include "common/history.h"
 
+typedef  std::vector<const Sentence*> Sentences;
+
 class Search {
   public:
     Search(size_t threadId);
     virtual ~Search();
 
-    void SetSource(const Sentence *sentence) {
-      sentence_ = sentence;
-    }
-
-    Histories Decode();
+    Histories Decode(const Sentences &sentences);
 
   private:
     size_t MakeFilter(const Words& srcWords, const size_t vocabSize);
     std::vector<ScorerPtr> scorers_;
     Words filterIndices_;
-    const Sentence *sentence_;
 
     History Decode(const Sentence *sentence);
 
