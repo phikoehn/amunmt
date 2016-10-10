@@ -21,11 +21,11 @@ Search::~Search()
 {
 }
 
-Histories Search::Decode(const Sentences &sentences) {
+Histories Search::Decode(const Sentences *sentences) {
   Histories ret;
 
-  for (size_t i = 0; i < sentences.size(); ++i) {
-    const Sentence *sentence = sentences[i];
+  for (size_t i = 0; i < sentences->size(); ++i) {
+    const Sentence *sentence = sentences->at(i);
     History history = Decode(sentence);
     ret.push_back(history);
   }

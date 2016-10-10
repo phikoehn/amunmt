@@ -2,7 +2,7 @@
 #include "translation_task.h"
 #include "search.h"
 
-Histories TranslationTask(const Sentences &sentences, size_t taskCounter) {
+Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
 
 #ifdef __APPLE__
   static boost::thread_specific_ptr<Search> s_search;

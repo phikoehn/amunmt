@@ -32,12 +32,14 @@ int main(int argc, char* argv[]) {
 
   LOG(info) << "Total number of threads: " << totalThreads;
 
+  size_t maxBatchSize = God::Get<size_t>("batch-size");
+
   if (God::Get<bool>("wipo")) {
     LOG(info) << "Reading input";
     while (std::getline(God::GetInputStream(), in)) {
       Sentence *sentence = new Sentence(taskCounter, in);
-      Sentences sentences;
-      sentences.push_back(sentence);
+      Sentences *sentences = new Sentences();;
+      sentences->push_back(sentence);
 
       Histories result = TranslationTask(sentences, taskCounter);
       Printer(result, taskCounter++, std::cout);
@@ -47,20 +49,30 @@ int main(int argc, char* argv[]) {
     LOG(info) << "Reading input";
 
     std::vector<std::future<Histories>> results;
+    Sentences *sentences = new Sentences();;
 
     while(std::getline(God::GetInputStream(), in)) {
       Sentence *sentence = new Sentence(taskCounter, in);
-      Sentences sentences;
-      sentences.push_back(sentence);
+      sentences->push_back(sentence);
 
-      results.emplace_back(
-        pool.enqueue(
-          [=]{ return TranslationTask(sentences, taskCounter); }
-        )
-      );
+      if (sentences->size() >= maxBatchSize) {
+        results.emplace_back(
+          pool.enqueue(
+            [=]{ return TranslationTask(sentences, taskCounter); }
+          )
+        );
 
-      taskCounter++;
+        sentences = new Sentences();;
+
+        taskCounter++;
+      }
     }
+
+    results.emplace_back(
+      pool.enqueue(
+        [=]{ return TranslationTask(sentences, taskCounter); }
+      )
+    );
 
     size_t lineCounter = 0;
     for (auto&& result : results)
