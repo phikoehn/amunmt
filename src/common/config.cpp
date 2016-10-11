@@ -181,12 +181,12 @@ void Config::AddOptions(size_t argc, char** argv) {
      "CUDA device(s) to use, set to 0 by default, "
      "e.g. set to 0 1 to use gpu0 and gpu1. "
      "Implicitly sets minimal number of threads to number of devices.")
-    ("gpu-threads,g", po::value<size_t>()->default_value(1),
+    ("gpu-threads", po::value<size_t>()->default_value(1),
      "Number of threads on a single GPU.")
-    ("cpu-threads,p", po::value<size_t>()->default_value(0),
+    ("cpu-threads", po::value<size_t>()->default_value(0),
      "Number of threads on the CPU.")
 #else
-    ("cpu-threads,p", po::value<size_t>()->default_value(1),
+    ("cpu-threads", po::value<size_t>()->default_value(1),
      "Number of threads on the CPU.")
 #endif
     ("show-weights", po::value<bool>()->zero_tokens()->default_value(false),
@@ -195,6 +195,8 @@ void Config::AddOptions(size_t argc, char** argv) {
      "Load scorer weights from this file")
     ("wipo", po::value<bool>()->zero_tokens()->default_value(false),
      "Use WIPO specific n-best-list format and non-buffering single-threading")
+    ("return-alignment", po::value<bool>()->zero_tokens()->default_value(false),
+     "If true, return alignment.")
     ("help,h", po::value<bool>()->zero_tokens()->default_value(false),
      "Print this help message and exit")
   ;
@@ -253,6 +255,7 @@ void Config::AddOptions(size_t argc, char** argv) {
   SET_OPTION("n-best", bool);
   SET_OPTION("normalize", bool);
   SET_OPTION("wipo", bool);
+  SET_OPTION("return-alignment", bool);
   SET_OPTION("softmax-filter", std::vector<std::string>);
   SET_OPTION("allow-unk", bool);
   SET_OPTION("debpe", bool);
