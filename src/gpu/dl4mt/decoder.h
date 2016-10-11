@@ -114,6 +114,8 @@ class Decoder {
           Copy(Temp1_, SCU_);
           Broadcast(Tanh(_1 + _2), Temp1_, Temp2_);
 
+          //Temp();
+
           Prod(A_, w_.V_, Temp1_, false, true);
 
           size_t rows1 = SourceContext.Rows();
@@ -146,6 +148,36 @@ class Decoder {
 
         mblas::Matrix Ones_;
         mblas::Matrix Sums_;
+
+        void Temp() {
+          using namespace mblas;
+
+          GPU::mblas::Matrix m1(2,3);
+           float v = 1;
+           for (size_t i = 0; i < 2; ++i) {
+             for (size_t j = 0; j < 3; ++j) {
+               m1.Set(i, j, v++);
+             }
+           }
+
+           GPU::mblas::Matrix m2(4,3);
+           v = 10;
+           for (size_t i = 0; i < 4; ++i) {
+             for (size_t j = 0; j < 3; ++j) {
+               m2.Set(i, j, v++);
+             }
+           }
+
+           std::cerr << "BEFORE m1=" << m1.Debug() << std::endl;
+           std::cerr << "BEFORE m2=" << m2.Debug() << std::endl;
+
+           //Broadcast(_1 + _2, m1, m2);
+           Broadcast(_1, m1, m2);
+
+           std::cerr << "AFTER  m1=" << m1.Debug() << std::endl;
+           std::cerr << "AFTER  m2=" << m2.Debug() << std::endl;
+
+        }
     };
 
     template <class Weights>
