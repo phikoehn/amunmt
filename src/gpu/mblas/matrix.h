@@ -109,18 +109,26 @@ class TMatrix : public BaseMatrix {
       cols_ = cols;
     }
 
+    virtual std::string DebugShape() const
+    {
+      std::stringstream strm;
+      strm << Rows() << "x" << Cols(); // ":\n";
+      return strm.str();
+    }
+
     virtual std::string Debug() const
     {
       std::stringstream strm;
-      strm << Rows() << "x" << Cols() << ":"; // ":\n";
+      strm << DebugShape() << ":"; // ":\n";
       for (size_t row = 0; row < Rows(); ++row) {
-        float rowSum = 0;
+        //float rowSum = 0;
         for (size_t col = 0; col < Cols(); ++col) {
-          //strm << (*this)(row, col) << " ";
-          rowSum += (*this)(row, col);
+          strm << (*this)(row, col) << " ";
+          //rowSum += (*this)(row, col);
         }
+        strm << "; ";
         //strm << std::endl;
-        strm << rowSum << " ";
+        //strm << rowSum << " ";
       }
       return strm.str();
     }
