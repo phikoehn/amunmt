@@ -11,6 +11,8 @@ class Sentence {
     
     size_t GetLine() const;
     
+    std::string Debug() const;
+
   private:
     std::vector<Words> words_;
     size_t lineNo_;

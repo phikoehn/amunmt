@@ -1,3 +1,4 @@
+#include <sstream>
 #include "sentence.h"
 #include "god.h"
 #include "utils.h"
@@ -26,3 +27,20 @@ size_t Sentence::GetLine() const {
   return lineNo_;
 }
 
+std::string Sentence::Debug() const
+{
+  std::stringstream strm;
+
+  for (size_t i = 0; i < words_.size(); ++i) {
+    const Words &moreWords = words_[i];
+    strm << " size=" << moreWords.size() << ": ";
+    for (size_t j = 0; j < moreWords.size(); ++j) {
+      const Word &word = moreWords[j];
+      strm << word << " ";
+    }
+
+    strm << " |";
+  }
+
+  return strm.str();
+}
