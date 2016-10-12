@@ -89,7 +89,7 @@ class Encoder {
     typedef std::vector<mblas::Matrix> EmbeddedSentence;
     typedef std::vector<EmbeddedSentence> EmbeddedSentences;
 
-    EmbeddedSentence embeddedWords_;
+    EmbeddedSentences embeddedSentences_;
 
 };
 

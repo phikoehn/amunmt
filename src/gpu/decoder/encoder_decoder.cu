@@ -67,7 +67,7 @@ void EncoderDecoder::BeginSentenceState(State& state) {
 }
 
 void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
-  cerr << "SetSource" << source.Debug() << endl;
+  //cerr << "SetSource" << source.Debug() << endl;
   encoder_->GetContext(sentInd, source.GetWords(tab_),
                        *SourceContext_);
 }
