@@ -5,8 +5,6 @@
 #include "common/sentence.h"
 #include "common/history.h"
 
-typedef  std::vector<const Sentence*> Sentences;
-
 class Search {
   public:
     Search(size_t threadId);

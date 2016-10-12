@@ -35,6 +35,7 @@ class ApePenalty : public Scorer {
 
     // @TODO: make this work on GPU
     virtual void SetSource(const Sentence& source);
+    virtual void SetSources(const Sentences& sources);
 
     // @TODO: make this work on GPU
     virtual void Score(const State& in,

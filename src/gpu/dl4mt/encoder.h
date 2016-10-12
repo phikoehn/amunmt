@@ -78,6 +78,9 @@ class Encoder {
     void GetContext(const std::vector<size_t>& words,
                     mblas::Matrix& Context);
 
+    void GetContext(const Sentences& sentences, size_t tab,
+            mblas::Matrix& Context);
+
   private:
     Embeddings<Weights::EncEmbeddings> embeddings_;
     RNN<Weights::EncForwardGRU> forwardRnn_;

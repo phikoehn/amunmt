@@ -19,3 +19,6 @@ class Sentence {
     std::string line_;
 };
 
+/////////////////////////////////////////////////////////
+typedef  std::vector<const Sentence*> Sentences;
+

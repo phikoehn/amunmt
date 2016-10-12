@@ -85,6 +85,10 @@ void EncoderDecoder::SetSource(const Sentence& source) {
                         SourceContext_);
 }
 
+void EncoderDecoder::SetSources(const Sentences& sources)
+{
+}
+
 void EncoderDecoder::AssembleBeamState(const State& in,
                                        const Beam& beam,
                                        State& out) {

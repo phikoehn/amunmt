@@ -15,9 +15,11 @@ void Encoder::GetContext(const std::vector<size_t>& words,
   std::vector<mblas::Matrix> embeddedWords;
 
   Context.Resize(words.size(), forwardRnn_.GetStateLength() + backwardRnn_.GetStateLength());
+  cerr << "Context=" << Context.DebugShape() << endl;
+
   for(auto& w : words) {
-	embeddedWords.emplace_back();
-	embeddings_.Lookup(embeddedWords.back(), w);
+    embeddedWords.emplace_back();
+    embeddings_.Lookup(embeddedWords.back(), w);
   }
   //cerr << "embeddings_=" << embeddings_.w_.E_.Debug() << endl;
 
@@ -27,6 +29,11 @@ void Encoder::GetContext(const std::vector<size_t>& words,
   backwardRnn_.GetContext(embeddedWords.crbegin(),
 						  embeddedWords.crend(),
 						  Context, true);
+}
+
+void Encoder::GetContext(const Sentences& sentences, size_t tab,
+        mblas::Matrix& Context) {
+
 }
 
 }

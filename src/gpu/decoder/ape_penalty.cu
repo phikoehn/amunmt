@@ -29,6 +29,11 @@ void ApePenalty::SetSource(const Sentence& source) {
   }
 }
 
+void ApePenalty::SetSources(const Sentences& sources)
+{
+
+}
+
 // @TODO: make this work on GPU
 void ApePenalty::Score(const State& in,
 		BaseMatrix& prob,

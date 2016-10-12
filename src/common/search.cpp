@@ -24,6 +24,14 @@ Search::~Search()
 Histories Search::Decode(const Sentences *sentences) {
   Histories ret;
 
+  // batching
+  for (size_t i = 0; i < scorers_.size(); i++) {
+    Scorer &scorer = *scorers_[i];
+    scorer.SetSources(*sentences);
+
+  }
+
+  // process individual sentences
   for (size_t i = 0; i < sentences->size(); ++i) {
     const Sentence *sentence = sentences->at(i);
     History history = Decode(sentence);

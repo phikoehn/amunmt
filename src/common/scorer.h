@@ -47,6 +47,7 @@ class Scorer {
                                    State& out) = 0;
 
     virtual void SetSource(const Sentence& source) = 0;
+    virtual void SetSources(const Sentences& sources) = 0;
 
     virtual void Filter(const std::vector<size_t>&) = 0;
 
