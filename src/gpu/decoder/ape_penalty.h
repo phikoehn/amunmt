@@ -34,7 +34,7 @@ class ApePenalty : public Scorer {
                const Penalties& penalties);
 
     // @TODO: make this work on GPU
-    virtual void SetSource(const Sentence& source);
+    virtual void SetSource(size_t sentInd, const Sentence& source);
     virtual void SetSources(const Sentences& sources);
 
     // @TODO: make this work on GPU

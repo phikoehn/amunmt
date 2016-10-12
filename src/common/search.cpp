@@ -34,14 +34,14 @@ Histories Search::Decode(const Sentences *sentences) {
   // process individual sentences
   for (size_t i = 0; i < sentences->size(); ++i) {
     const Sentence *sentence = sentences->at(i);
-    History history = Decode(sentence);
+    History history = Decode(i, sentence);
     ret.push_back(history);
   }
 
   return ret;
 }
 
-History Search::Decode(const Sentence *sentence) {
+History Search::Decode(size_t sentInd, const Sentence *sentence) {
   boost::timer::cpu_timer timer;
 
   size_t beamSize = God::Get<size_t>("beam-size");
@@ -68,7 +68,7 @@ History Search::Decode(const Sentence *sentence) {
 
   for (size_t i = 0; i < scorers_.size(); i++) {
     Scorer &scorer = *scorers_[i];
-    scorer.SetSource(*sentence);
+    scorer.SetSource(sentInd, *sentence);
 
     states[i].reset(scorer.NewState());
     nextStates[i].reset(scorer.NewState());

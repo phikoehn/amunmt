@@ -17,6 +17,6 @@ class Search {
     std::vector<ScorerPtr> scorers_;
     Words filterIndices_;
 
-    History Decode(const Sentence *sentence);
+    History Decode(size_t sentInd, const Sentence *sentence);
 
 };

@@ -10,24 +10,24 @@ Encoder::Encoder(const Weights& model)
   backwardRnn_(model.encBackwardGRU_)
 {}
 
-void Encoder::GetContext(const std::vector<size_t>& words,
+void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
 				mblas::Matrix& Context) {
-  std::vector<mblas::Matrix> embeddedWords;
-
   Context.Resize(words.size(), forwardRnn_.GetStateLength() + backwardRnn_.GetStateLength());
   cerr << "Context=" << Context.DebugShape() << endl;
 
+  embeddedWords_.clear();
+
   for(auto& w : words) {
-    embeddedWords.emplace_back();
-    embeddings_.Lookup(embeddedWords.back(), w);
+    embeddedWords_.emplace_back();
+    embeddings_.Lookup(embeddedWords_.back(), w);
   }
   //cerr << "embeddings_=" << embeddings_.w_.E_.Debug() << endl;
 
-  forwardRnn_.GetContext(embeddedWords.cbegin(),
-						 embeddedWords.cend(),
+  forwardRnn_.GetContext(embeddedWords_.cbegin(),
+						 embeddedWords_.cend(),
 						 Context, false);
-  backwardRnn_.GetContext(embeddedWords.crbegin(),
-						  embeddedWords.crend(),
+  backwardRnn_.GetContext(embeddedWords_.crbegin(),
+						  embeddedWords_.crend(),
 						  Context, true);
 }
 

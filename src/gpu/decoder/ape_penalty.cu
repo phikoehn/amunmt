@@ -15,7 +15,7 @@ ApePenalty::ApePenalty(const std::string& name,
 {}
 
 // @TODO: make this work on GPU
-void ApePenalty::SetSource(const Sentence& source) {
+void ApePenalty::SetSource(size_t sentInd, const Sentence& source) {
   const Words& words = source.GetWords(tab_);
 
   costs_.clear();

@@ -80,7 +80,7 @@ void EncoderDecoder::BeginSentenceState(State& state) {
   decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
 }
 
-void EncoderDecoder::SetSource(const Sentence& source) {
+void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
   encoder_->GetContext(source.GetWords(tab_),
                         SourceContext_);
 }

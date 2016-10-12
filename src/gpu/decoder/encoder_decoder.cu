@@ -66,9 +66,9 @@ void EncoderDecoder::BeginSentenceState(State& state) {
   decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
 }
 
-void EncoderDecoder::SetSource(const Sentence& source) {
+void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
   cerr << "SetSource" << source.Debug() << endl;
-  encoder_->GetContext(source.GetWords(tab_),
+  encoder_->GetContext(sentInd, source.GetWords(tab_),
                        *SourceContext_);
 }
 
