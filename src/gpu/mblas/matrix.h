@@ -351,21 +351,21 @@ private:
 typedef TMatrix<FVec> Matrix;
 typedef TMatrix<IVec> IMatrix;
 
-Matrix& Swap(Matrix& Out, Matrix& In);
+void Swap(Matrix& Out, Matrix& In);
 
-Matrix& Mean(Matrix& Out, const Matrix& In);
+void Mean(Matrix& Out, const Matrix& In);
 
-Matrix& Transpose(Matrix& Out, const Matrix& In);
+void Transpose(Matrix& Out, const Matrix& In);
 
-Matrix& Transpose(Matrix& Out);
+void Transpose(Matrix& Out);
 
-Matrix& Copy(Matrix& Out, const Matrix& In);
+void Copy(Matrix& Out, const Matrix& In);
 
-Matrix& PasteRow(Matrix& Out,
+void PasteRow(Matrix& Out,
                  const Matrix& In,
                  const size_t r = 0, const size_t c = 0);
 
-Matrix& CopyRow(Matrix& Out,
+void CopyRow(Matrix& Out,
                 const Matrix& In,
                 const size_t r = 0, const size_t c = 0);
 
@@ -375,30 +375,30 @@ typedef thrust::device_vector<RowPair> DeviceRowPairs;
 
 Matrix& Concat(Matrix& Out, const Matrix& In);
 
-Matrix& CopyRows(Matrix& Out,
+void CopyRows(Matrix& Out,
                  const Matrix& In,
                  const RowPair* devPairs,
                  size_t numPairs);
 
-Matrix& CopyRows(Matrix& Out,
+void CopyRows(Matrix& Out,
                  const Matrix& In,
                  const RowPairs& pairs);
 
-Matrix& Assemble(Matrix& Out,
+void Assemble(Matrix& Out,
                  const Matrix& In,
                  const std::vector<size_t>& indeces);
 
-Matrix& Slice(Matrix& Out,
+void Slice(Matrix& Out,
               const Matrix& In,
               size_t n, size_t dim);
 
-Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
+void Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
              bool transA = false, bool transB = false);
 
-Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
+void Prod(Matrix& C, const Matrix& A, const Matrix& B,
              bool transA = false, bool transB = false);
 
-Matrix& Softmax(Matrix& Out);
+void Softmax(Matrix& Out);
 
 template <class Functor>
 __global__ void gBroadcast(Functor functor,
@@ -422,7 +422,7 @@ __global__ void gBroadcast(Functor functor,
 }
 
 template <class Functor>
-Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
+void Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
   size_t rows1 = Out.GetShape().rows;
   size_t rows2 = In.GetShape().rows;
 
@@ -441,11 +441,10 @@ Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t s
                                              rows, rows1, cols);
   cudaStreamSynchronize(stream);
   Swap(Out, Temp);
-  return Out;
 }
 
 template <class Functor>
-Matrix& BroadcastColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
+void BroadcastColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
   // @TODO: Make this efficient with special kernel!
   Matrix InTemp;
   Transpose(InTemp, In);
@@ -453,7 +452,6 @@ Matrix& BroadcastColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStre
   Transpose(Out);
   Broadcast(functor, Out, InTemp, stream);
   Transpose(Out);
-  return Out;
 }
 
 template <class Functor>
@@ -475,7 +473,7 @@ __global__ void gBroadcastVecColumn(Functor functor,
 }
 
 template <class Functor>
-Matrix& BroadcastVecColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
+void BroadcastVecColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
   size_t rows  = Out.GetShape().rows;
   size_t cols = Out.GetShape().cols;
 
@@ -486,7 +484,6 @@ Matrix& BroadcastVecColumn(Functor functor, Matrix& Out, const Matrix& In, cudaS
   int threads = std::min(MAX_THREADS, (int)rows);
   gBroadcastVecColumn<<<blocks, threads, 0, stream>>>(functor, d_out, d_in, rows, cols);
   cudaStreamSynchronize(stream);
-  return Out;
 }
 
 template <class Functor>
@@ -507,7 +504,7 @@ __global__ void gBroadcastVec(Functor functor,
 }
 
 template <class Functor>
-Matrix& BroadcastVec(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
+void BroadcastVec(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
   //Broadcast(functor, Out, In, stream);
   size_t rows  = Out.GetShape().rows;
   size_t cols = Out.GetShape().cols;
@@ -519,7 +516,6 @@ Matrix& BroadcastVec(Functor functor, Matrix& Out, const Matrix& In, cudaStream_
   int threads = std::min(MAX_THREADS, (int)cols);
   gBroadcastVec<<<blocks, threads, 0, stream>>>(functor, d_out, d_in, rows, cols);
   cudaStreamSynchronize(stream);
-  return Out;
 }
 
 
