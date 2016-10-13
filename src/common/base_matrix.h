@@ -28,6 +28,8 @@ public:
     Resize(rows, cols, batches);
   }
 
+  virtual std::string Debug() const;
+
   void Resize(size_t rows, size_t cols, size_t batches = 1) {
     this->rows = rows;
     this->cols = cols;
@@ -56,6 +58,10 @@ public:
   virtual ~BaseMatrix() {}
 
   const Shape &GetShape() const {
+    return shape_;
+  }
+
+  Shape &GetShape() {
     return shape_;
   }
 

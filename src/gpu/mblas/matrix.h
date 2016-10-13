@@ -98,21 +98,10 @@ class TMatrix : public BaseMatrix {
       data_.reserve(rows * cols);
     }
 
-    void Reshape(size_t rows, size_t cols) {
-      shape_.Resize(rows, cols);
-    }
-
-    virtual std::string DebugShape() const
-    {
-      std::stringstream strm;
-      strm << GetShape().rows << "x" << GetShape().cols; // ":\n";
-      return strm.str();
-    }
-
     virtual std::string Debug() const
     {
       std::stringstream strm;
-      strm << DebugShape() << ":"; // ":\n";
+      strm << GetShape().Debug() << ":"; // ":\n";
       for (size_t row = 0; row < GetShape().rows; ++row) {
         //float rowSum = 0;
         for (size_t col = 0; col < GetShape().cols; ++col) {
@@ -361,19 +350,6 @@ private:
 
 typedef TMatrix<FVec> Matrix;
 typedef TMatrix<IVec> IMatrix;
-
-template <class M>
-void Debug(const M& m, size_t pos = 0, size_t l = 5) {
-  std::cerr << m.GetShape().rows << " " << m.GetShape().cols << std::endl;
-  for(size_t i = 0; i < m.GetShape().rows; ++i) {
-    for(size_t j = pos; j < m.GetShape().cols && j < pos + l; ++j) {
-      std::cerr << m.GetVec()[i * m.GetShape().cols + j] << " ";
-    }
-    std::cerr << std::endl;
-    if(i == 4)
-      break;
-  }
-}
 
 Matrix& Swap(Matrix& Out, Matrix& In);
 

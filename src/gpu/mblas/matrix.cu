@@ -16,8 +16,8 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
   size_t oRows = Out.GetShape().rows;
   size_t oCols = Out.GetShape().cols;
 
-  Out.Reshape(iRows, iCols);
-  In.Reshape(oRows, oCols);
+  Out.GetShape().Resize(iRows, iCols);
+  In.GetShape().Resize(oRows, oCols);
 
   In.GetVec().swap(Out.GetVec());
   return Out;

@@ -3,6 +3,7 @@ include_directories(.)
 include_directories(3rd_party)
 
 add_library(libcommon OBJECT
+  common/base_matrix.cpp
   common/config.cpp
   common/exception.cpp
   common/filter.cpp
