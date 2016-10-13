@@ -56,48 +56,50 @@ class TMatrix : public BaseMatrix {
     typedef typename VecType::const_iterator const_iterator;
 
     TMatrix()
-    : rows_(0), cols_(0)
+    :BaseMatrix()
     {}
 
     TMatrix(size_t rows, size_t cols)
-    : rows_(rows), cols_(cols), data_(rows_ * cols_)
+    : BaseMatrix(rows, cols)
+    , data_(shape_.GetSize())
     {}
 
     TMatrix(size_t rows, size_t cols, value_type val)
-    : rows_(rows), cols_(cols), data_(rows_ * cols_, val)
+    : BaseMatrix(rows, cols)
+    , data_(shape_.GetSize(), val)
     {}
 
     TMatrix(TMatrix&& m)
-    : rows_(m.rows_), cols_(m.cols_), data_(std::move(m.data_)) {}
+    : BaseMatrix(m.shape_.rows, m.shape_.cols)
+    , data_(std::move(m.data_))
+    {}
 
     TMatrix(const TMatrix& m) = delete;
 
     value_type operator()(size_t i, size_t j) const {
-      return data_[i * cols_ + j];
+      return data_[i * shape_.cols + j];
     }
 
     void Set(size_t i, size_t j, float value)  {
-      data_[i * cols_ + j] = value;
+      data_[i * shape_.cols + j] = value;
     }
 
     size_t Rows() const {
-      return rows_;
+      return shape_.rows;
     }
 
     size_t Cols() const {
-      return cols_;
+      return shape_.cols;
     }
 
     void Resize(size_t rows, size_t cols) {
-      rows_ = rows;
-      cols_ = cols;
-      data_.resize(rows_ * cols_);
+      shape_.Resize(rows, cols);
+      data_.resize(shape_.GetSize());
     }
 
     void Resize(size_t rows, size_t cols, value_type val) {
-      rows_ = rows;
-      cols_ = cols;
-      data_.resize(rows_ * cols_, val);
+      shape_.Resize(rows, cols);
+      data_.resize(shape_.GetSize(), val);
     }
 
     void Reserve(size_t rows, size_t cols) {
@@ -105,8 +107,7 @@ class TMatrix : public BaseMatrix {
     }
 
     void Reshape(size_t rows, size_t cols) {
-      rows_ = rows;
-      cols_ = cols;
+      shape_.Resize(rows, cols);
     }
 
     virtual std::string DebugShape() const
@@ -141,14 +142,12 @@ class TMatrix : public BaseMatrix {
 
     void Clear() {
       data_.clear();
-      rows_ = 0;
-      cols_ = 0;
+      shape_.Resize(0,0);
     }
 
     VecType& GetVec() {
       return data_;
     }
-
 
     const VecType& GetVec() const {
       return data_;
@@ -328,8 +327,6 @@ class TMatrix : public BaseMatrix {
   }
 
   private:
-    size_t rows_;
-    size_t cols_;
     VecType data_;
 };
 
