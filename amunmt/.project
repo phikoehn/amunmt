@@ -26,9 +26,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>cnpy</name>
+			<name>3rd_party</name>
 			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/src/3rd_party</locationURI>
 		</link>
 		<link>
 			<name>common</name>
@@ -36,29 +36,9 @@
 			<locationURI>PARENT-1-PROJECT_LOC/src/common</locationURI>
 		</link>
 		<link>
-			<name>cpu</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/src/cpu</locationURI>
-		</link>
-		<link>
 			<name>gpu</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/src/gpu</locationURI>
-		</link>
-		<link>
-			<name>cnpy/LICENSE</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/src/cnpy/LICENSE</locationURI>
-		</link>
-		<link>
-			<name>cnpy/cnpy.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/src/cnpy/cnpy.cpp</locationURI>
-		</link>
-		<link>
-			<name>cnpy/cnpy.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/src/cnpy/cnpy.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

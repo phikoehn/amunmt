@@ -2,16 +2,6 @@
 include_directories(.)
 include_directories(3rd_party)
 
-add_library(cpumode OBJECT
-  cpu/mblas/matrix.cpp
-  cpu/mblas/phoenix_functions.cpp
-  cpu/dl4mt/decoder.cpp
-  cpu/dl4mt/encoder.cpp
-  cpu/dl4mt/gru.cpp
-  cpu/dl4mt/model.cpp
-  cpu/decoder/encoder_decoder.cpp
-)
-
 add_library(libcommon OBJECT
   common/config.cpp
   common/exception.cpp
@@ -46,7 +36,6 @@ cuda_add_executable(
   gpu/npz_converter.cu
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcommon>
-  $<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libyaml-cpp>
   $<TARGET_OBJECTS:libcnpy>
 )
@@ -62,7 +51,6 @@ cuda_add_library(amunmt SHARED
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcommon>
   $<TARGET_OBJECTS:libcnpy>
-  $<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libyaml-cpp>
 )
 
@@ -84,7 +72,6 @@ add_executable(
   common/decoder_main.cpp
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcnpy>
-  $<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libcommon>
   $<TARGET_OBJECTS:libyaml-cpp>
 )
@@ -93,7 +80,6 @@ add_library(amunmt SHARED
   python/amunmt.cpp
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcnpy>
-  $<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libcommon>
   $<TARGET_OBJECTS:libyaml-cpp>
 )

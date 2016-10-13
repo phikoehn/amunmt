@@ -23,9 +23,6 @@ class LoaderFactory {
 
   protected:
 
-    static Loader *CreateCPU(const std::string& name,
-                            const YAML::Node& config);
-
     static Loader *CreateGPU(const std::string& name,
                             const YAML::Node& config);
 
