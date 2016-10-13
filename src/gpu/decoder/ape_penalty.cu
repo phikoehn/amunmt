@@ -39,7 +39,7 @@ void ApePenalty::Score(const State& in,
 		BaseMatrix& prob,
 		State& out) {
   mblas::Matrix &probCast = static_cast<mblas::Matrix&>(prob);
-  size_t cols = probCast.Cols();
+  size_t cols = probCast.GetShape().cols;
   costs_.resize(cols, -1.0);
   for(size_t i = 0; i < prob.GetShape().rows; ++i)
 	algo::copy(costs_.begin(), costs_.begin() + cols, probCast.begin() + i * cols);

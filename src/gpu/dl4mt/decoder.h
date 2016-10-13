@@ -25,7 +25,7 @@ class Decoder {
         }
 
         size_t GetCols() {
-          return w_.E_.Cols();
+          return w_.E_.GetShape().cols;
         }
 
         size_t GetRows() const {
@@ -49,7 +49,7 @@ class Decoder {
 
           Mean(Temp1_, SourceContext);
           Temp2_.Clear();
-          Temp2_.Resize(batchSize, SourceContext.Cols(), 0.0);
+          Temp2_.Resize(batchSize, SourceContext.GetShape().cols, 0.0);
           BroadcastVec(_1 + _2, Temp2_, Temp1_);
           Prod(State, Temp2_, w_.Wi_);
           BroadcastVec(Tanh(_1 + _2), State, w_.Bi_);
