@@ -19,7 +19,7 @@ class Decoder {
           using namespace mblas;
           std::vector<size_t> tids = ids;
           for(auto&& id : tids)
-            if(id >= w_.E_.Rows())
+            if(id >= w_.E_.GetShape().rows)
               id = 1;
           Assemble(Rows, w_.E_, tids);
         }
@@ -29,7 +29,7 @@ class Decoder {
         }
 
         size_t GetRows() const {
-          return w_.E_.Rows();
+          return w_.E_.GetShape().rows;
         }
 
       private:
@@ -118,8 +118,8 @@ class Decoder {
 
           Prod(A_, w_.V_, Temp1_, false, true);
 
-          size_t rows1 = SourceContext.Rows();
-          size_t rows2 = HiddenState.Rows();
+          size_t rows1 = SourceContext.GetShape().rows;
+          size_t rows2 = HiddenState.GetShape().rows;
           A_.Reshape(rows2, rows1); // due to broadcasting above
           Element(_1 + w_.C_(0,0), A_);
 

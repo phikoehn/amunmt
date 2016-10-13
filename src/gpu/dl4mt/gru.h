@@ -46,7 +46,7 @@ class SlowGRU {
     }
     
     size_t GetStateLength() const {
-      return w_.U_.Rows();
+      return w_.U_.GetShape().rows;
     }
     
   private:
@@ -112,7 +112,7 @@ class FastGRU {
                         const mblas::Matrix& State,
                         const mblas::Matrix& RUH,
                         const mblas::Matrix& Temp) const {
-      const size_t rows = State.Rows();
+      const size_t rows = State.GetShape().rows;
       const size_t cols = State.Cols();
       NextState.Resize(rows, cols);
       
@@ -127,7 +127,7 @@ class FastGRU {
     }
     
     size_t GetStateLength() const {
-      return w_.U_.Rows();
+      return w_.U_.GetShape().rows;
     }
 
     

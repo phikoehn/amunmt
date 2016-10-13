@@ -55,8 +55,10 @@ public:
 
   virtual ~BaseMatrix() {}
 
-  virtual size_t Rows() const = 0;
-  virtual size_t Cols() const = 0;
+  const Shape &GetShape() const {
+    return shape_;
+  }
+
   virtual void Resize(size_t rows, size_t cols) = 0;
 
   virtual void BestHyps(Beam& bestHyps,

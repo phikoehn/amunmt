@@ -11,9 +11,9 @@ thread_local cublasHandle_t* CublasHandler::handle_ = nullptr;
 #endif
 
 Matrix& Swap(Matrix& Out, Matrix& In) {
-  size_t iRows = In.Rows();
+  size_t iRows = In.GetShape().rows;
   size_t iCols = In.Cols();
-  size_t oRows = Out.Rows();
+  size_t oRows = Out.GetShape().rows;
   size_t oCols = Out.Cols();
 
   Out.Reshape(iRows, iCols);
@@ -24,7 +24,7 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
 }
 
 Matrix& Mean(Matrix& Out, const Matrix& In) {
-  size_t m = In.Rows();
+  size_t m = In.GetShape().rows;
   size_t n = In.Cols();
 
   Out.Resize(1, n, 0.f);
@@ -38,7 +38,7 @@ Matrix& Mean(Matrix& Out, const Matrix& In) {
 }
 
 Matrix& Transpose(Matrix& Out, const Matrix& In) {
-  size_t m = In.Rows();
+  size_t m = In.GetShape().rows;
   size_t n = In.Cols();
 
   Out.Resize(n, m);
@@ -61,13 +61,13 @@ Matrix& Transpose(Matrix& Out) {
 
 Matrix& Concat(Matrix& Out, const Matrix& In) {
   size_t oldSize = Out.size();
-  Out.Resize(Out.Rows() + In.Rows(), Out.Cols());
+  Out.Resize(Out.GetShape().rows + In.GetShape().rows, Out.Cols());
   lib::copy(In.begin(), In.end(), Out.begin() + oldSize);
   return Out;
 }
 
 Matrix& Copy(Matrix& Out, const Matrix& In) {
-  Out.Resize(In.Rows(), In.Cols());
+  Out.Resize(In.GetShape().rows, In.Cols());
   lib::copy(In.begin(), In.end(), Out.begin());
   return Out;
 }
@@ -166,14 +166,14 @@ Matrix& Slice(Matrix& Out,
               const Matrix& In,
               size_t n, size_t dim) {
 
-  Out.Resize(In.Rows(), dim);
+  Out.Resize(In.GetShape().rows, dim);
 
   float* d_out = Out.data();
   const float* d_in = In.data();
 
   int threads = std::min(MAX_THREADS, (int)dim);
-  int blocks = std::min(MAX_BLOCKS, (int)In.Rows());
-  gSlice<<<blocks, threads>>>(d_out, d_in, n, dim, In.Rows(), In.Cols());
+  int blocks = std::min(MAX_BLOCKS, (int)In.GetShape().rows);
+  gSlice<<<blocks, threads>>>(d_out, d_in, n, dim, In.GetShape().rows, In.Cols());
   cudaStreamSynchronize(0);
   return Out;
 }
@@ -183,12 +183,12 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   Matrix::value_type alpha = 1.0;
   Matrix::value_type beta = 0.0;
 
-  //size_t m = A.Rows();
+  //size_t m = A.GetShape().rows;
   //size_t k = A.Cols();
   ////if(transA)
   ////  std::swap(m, k);
   //
-  //size_t l = B.Rows();
+  //size_t l = B.GetShape().rows;
   //size_t n = B.Cols();
   ////if(transB)
   ////  std::swap(l, n);
@@ -208,12 +208,12 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   //              alpha, beta,
   //              0, false, false, 0);
 
-  size_t m = A.Rows();
+  size_t m = A.GetShape().rows;
   size_t k = A.Cols();
   if(transA)
     std::swap(m, k);
 
-  size_t l = B.Rows();
+  size_t l = B.GetShape().rows;
   size_t n = B.Cols();
   if(transB)
     std::swap(l, n);
@@ -223,7 +223,7 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   size_t ldc = B.Cols();
 
   if(transB)
-    ldc = B.Rows();
+    ldc = B.GetShape().rows;
 
   C.Resize(m, n);
 
@@ -276,10 +276,10 @@ __global__ void gSoftMax(float* softMaxP, size_t rows, size_t cols) {
 }
 
 Matrix& Softmax(Matrix& Out) {
-  int blocks = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks = std::min(MAX_BLOCKS, (int)Out.GetShape().rows);
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
   int shared = sizeof(float) * threads * 2;
-  gSoftMax<<<blocks, threads, shared>>>(Out.data(), Out.Rows(), Out.Cols());
+  gSoftMax<<<blocks, threads, shared>>>(Out.data(), Out.GetShape().rows, Out.Cols());
   cudaStreamSynchronize(0);
   return Out;
 }

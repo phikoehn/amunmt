@@ -84,10 +84,6 @@ class TMatrix : public BaseMatrix {
       data_[i * shape_.cols + j] = value;
     }
 
-    size_t Rows() const {
-      return shape_.rows;
-    }
-
     size_t Cols() const {
       return shape_.cols;
     }
@@ -113,7 +109,7 @@ class TMatrix : public BaseMatrix {
     virtual std::string DebugShape() const
     {
       std::stringstream strm;
-      strm << Rows() << "x" << Cols(); // ":\n";
+      strm << GetShape().rows << "x" << Cols(); // ":\n";
       return strm.str();
     }
 
@@ -121,7 +117,7 @@ class TMatrix : public BaseMatrix {
     {
       std::stringstream strm;
       strm << DebugShape() << ":"; // ":\n";
-      for (size_t row = 0; row < Rows(); ++row) {
+      for (size_t row = 0; row < GetShape().rows; ++row) {
         //float rowSum = 0;
         for (size_t col = 0; col < Cols(); ++col) {
           strm << (*this)(row, col) << " ";
@@ -197,7 +193,7 @@ class TMatrix : public BaseMatrix {
 
 	  M& Probs = static_cast<M&>(*ProbsEnsemble[0]);
 
-	  M Costs(Probs.Rows(), 1);
+	  M Costs(Probs.GetShape().rows, 1);
 	  HostVector<float> vCosts;
 	  for(auto& h : prevHyps)
 		vCosts.push_back(h->GetCost());
@@ -218,7 +214,7 @@ class TMatrix : public BaseMatrix {
 
 	  // @TODO: make this more efficient
 	  if (!God::Get<bool>("allow-unk")) {
-        for(size_t i = 0; i < Probs.Rows(); i++)
+        for(size_t i = 0; i < Probs.GetShape().rows; i++)
             Probs.Set(i, UNK, std::numeric_limits<float>::lowest());
         }
 
@@ -372,8 +368,8 @@ typedef TMatrix<IVec> IMatrix;
 
 template <class M>
 void Debug(const M& m, size_t pos = 0, size_t l = 5) {
-  std::cerr << m.Rows() << " " << m.Cols() << std::endl;
-  for(size_t i = 0; i < m.Rows(); ++i) {
+  std::cerr << m.GetShape().rows << " " << m.Cols() << std::endl;
+  for(size_t i = 0; i < m.GetShape().rows; ++i) {
     for(size_t j = pos; j < m.Cols() && j < pos + l; ++j) {
       std::cerr << m.GetVec()[i * m.Cols() + j] << " ";
     }
@@ -455,8 +451,8 @@ __global__ void gBroadcast(Functor functor,
 
 template <class Functor>
 Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
-  size_t rows1 = Out.Rows();
-  size_t rows2 = In.Rows();
+  size_t rows1 = Out.GetShape().rows;
+  size_t rows2 = In.GetShape().rows;
 
   size_t rows = rows1 * rows2;
   size_t cols  = Out.Cols();
@@ -508,7 +504,7 @@ __global__ void gBroadcastVecColumn(Functor functor,
 
 template <class Functor>
 Matrix& BroadcastVecColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
-  size_t rows  = Out.Rows();
+  size_t rows  = Out.GetShape().rows;
   size_t cols = Out.Cols();
 
   float* d_out = Out.data();
@@ -541,7 +537,7 @@ __global__ void gBroadcastVec(Functor functor,
 template <class Functor>
 Matrix& BroadcastVec(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
   //Broadcast(functor, Out, In, stream);
-  size_t rows  = Out.Rows();
+  size_t rows  = Out.GetShape().rows;
   size_t cols = Out.Cols();
 
   float* d_out = Out.data();
@@ -613,9 +609,9 @@ __global__ void gElement(Functor functor,
 template <class Functor>
 Matrix& Element(Functor functor, Matrix& Out) {
   float* d_out = Out.data();
-  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.GetShape().rows);
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
-  gElement<<<blocks, threads>>>(functor, d_out, Out.Rows(), Out.Cols());
+  gElement<<<blocks, threads>>>(functor, d_out, Out.GetShape().rows, Out.Cols());
   cudaStreamSynchronize(0);
   return Out;
 }
@@ -626,9 +622,9 @@ Matrix& Element(Functor functor,
   float* d_out = Out.data();
   const float* d_in = In.data();
 
-  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.GetShape().rows);
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
-  gElement<<<blocks, threads>>>(functor, d_out, d_in, Out.Rows(), Out.Cols());
+  gElement<<<blocks, threads>>>(functor, d_out, d_in, Out.GetShape().rows, Out.Cols());
   cudaStreamSynchronize(0);
   return Out;
 }
@@ -641,10 +637,10 @@ Matrix& Element(Functor functor,
   const float* d_in1 = In1.data();
   const float* d_in2 = In2.data();
 
-  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.GetShape().rows);
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
   gElement<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
-                                Out.Rows(), Out.Cols());
+                                Out.GetShape().rows, Out.Cols());
   cudaStreamSynchronize(0);
   return Out;
 }
