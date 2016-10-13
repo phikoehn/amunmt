@@ -575,17 +575,16 @@ __global__ void gElement(Functor functor,
 }
 
 template <class Functor>
-Matrix& Element(Functor functor, Matrix& Out) {
+void Element(Functor functor, Matrix& Out) {
   float* d_out = Out.data();
   int blocks  = std::min(MAX_BLOCKS, (int)Out.GetShape().rows);
   int threads = std::min(MAX_THREADS, (int)Out.GetShape().cols);
   gElement<<<blocks, threads>>>(functor, d_out, Out.GetShape().rows, Out.GetShape().cols);
   cudaStreamSynchronize(0);
-  return Out;
 }
 
 template <class Functor>
-Matrix& Element(Functor functor,
+void Element(Functor functor,
                 Matrix& Out, const Matrix& In) {
   float* d_out = Out.data();
   const float* d_in = In.data();
@@ -594,11 +593,10 @@ Matrix& Element(Functor functor,
   int threads = std::min(MAX_THREADS, (int)Out.GetShape().cols);
   gElement<<<blocks, threads>>>(functor, d_out, d_in, Out.GetShape().rows, Out.GetShape().cols);
   cudaStreamSynchronize(0);
-  return Out;
 }
 
 template <class Functor>
-Matrix& Element(Functor functor,
+void Element(Functor functor,
                 Matrix& Out, const Matrix& In1, const Matrix& In2) {
 
   float* d_out = Out.data();
@@ -610,7 +608,6 @@ Matrix& Element(Functor functor,
   gElement<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
                                 Out.GetShape().rows, Out.GetShape().cols);
   cudaStreamSynchronize(0);
-  return Out;
 }
 
 }
