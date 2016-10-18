@@ -13,11 +13,13 @@ Encoder::Encoder(const Weights& model)
 void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
 				mblas::Matrix& Context) {
   Context.Resize(words.size(), forwardRnn_.GetStateLength() + backwardRnn_.GetStateLength());
-  //cerr << "Context=" << Context.DebugShape() << endl;
+  cerr << "Context=" << Context.GetShape().Debug() << endl;
 
   EmbeddedSentence &embeddedSentenceFwd = embeddedSentencesFwd_[sentInd];
   EmbeddedSentence &embeddedSentenceBck = embeddedSentencesBck_[sentInd];
-  //cerr << "embeddings_=" << embeddings_.w_.E_.Debug() << endl;
+
+  cerr << "embeddings_=" << embeddings_.w_.E_.GetShape().Debug() << endl;
+  cerr << "embeddedSentenceFwd=" << embeddedSentenceFwd.size() << endl;
 
   forwardRnn_.GetContext(embeddedSentenceFwd.cbegin(),
       embeddedSentenceFwd.cend(),
@@ -45,11 +47,15 @@ void Encoder::GetContext(const Sentences& sentences, size_t tab,
 
     for (size_t i = 0; i < words.size(); ++i) {
       const Word &wordFwd = words[i];
-      embeddings_.Lookup(embeddedSentenceFwd[i], wordFwd);
+      mblas::Matrix &mFwd = embeddedSentenceFwd[i];
+      embeddings_.Lookup(mFwd, wordFwd);
 
       const Word &wordBck = words[words.size() - i - 1];
-      embeddings_.Lookup(embeddedSentenceBck[i], wordBck);
+      mblas::Matrix &mBck = embeddedSentenceBck[i];
+      embeddings_.Lookup(mBck, wordBck);
 
+      cerr << "mFwd=" << mFwd.GetShape().Debug() << endl;
+      cerr << "mBck=" << mBck.GetShape().Debug() << endl;
     }
   }
 }
