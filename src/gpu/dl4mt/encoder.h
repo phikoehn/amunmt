@@ -47,7 +47,6 @@ class Encoder {
         template <class It>
         void GetContext(It it, It end, 
                         mblas::Matrix& Context, bool invert) {
-          InitializeState();
 
           size_t n = std::distance(it, end);
           size_t i = 0;

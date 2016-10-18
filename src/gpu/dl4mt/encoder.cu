@@ -21,9 +21,12 @@ void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
   cerr << "embeddings_=" << embeddings_.w_.E_.GetShape().Debug() << endl;
   cerr << "embeddedSentenceFwd=" << embeddedSentenceFwd.size() << endl;
 
+  forwardRnn_.InitializeState();
   forwardRnn_.GetContext(embeddedSentenceFwd.cbegin(),
       embeddedSentenceFwd.cend(),
 						 *context, false);
+
+  backwardRnn_.InitializeState();
   backwardRnn_.GetContext(embeddedSentenceBck.cbegin(),
       embeddedSentenceBck.cend(),
 						  *context, true);
