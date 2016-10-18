@@ -35,7 +35,9 @@ void ApePenalty::SetSources(const Sentences& sources)
 }
 
 // @TODO: make this work on GPU
-void ApePenalty::Score(const State& in,
+void ApePenalty::Score(
+    size_t sentInd,
+    const State& in,
 		BaseMatrix& prob,
 		State& out) {
   mblas::Matrix &probCast = static_cast<mblas::Matrix&>(prob);

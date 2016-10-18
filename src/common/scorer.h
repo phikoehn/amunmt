@@ -36,9 +36,11 @@ class Scorer {
 
     virtual ~Scorer() {}
 
-    virtual void Score(const State& in,
-                       BaseMatrix& prob,
-                       State& out) = 0;
+    virtual void Score(
+        size_t sentInd,
+        const State& in,
+        BaseMatrix& prob,
+        State& out) = 0;
 
     virtual void BeginSentenceState(State& state) = 0;
 

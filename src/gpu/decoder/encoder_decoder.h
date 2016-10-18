@@ -33,9 +33,11 @@ class EncoderDecoder : public Scorer {
                    size_t tab,
                    const Weights& model);
 
-    virtual void Score(const State& in,
-                       BaseMatrix& prob,
-                       State& out);
+    virtual void Score(
+          size_t sentInd,
+          const State& in,
+          BaseMatrix& prob,
+          State& out);
 
     virtual State* NewState();
 

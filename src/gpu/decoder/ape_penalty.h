@@ -38,7 +38,9 @@ class ApePenalty : public Scorer {
     virtual void SetSources(const Sentences& sources);
 
     // @TODO: make this work on GPU
-    virtual void Score(const State& in,
+    virtual void Score(
+        size_t sentInd,
+        const State& in,
     		BaseMatrix& prob,
     		State& out);
 

@@ -87,7 +87,7 @@ History Search::Decode(size_t sentInd, const Sentence *sentence) {
       State &nextState = *nextStates[i];
 
       prob.Resize(beamSize, vocabSize);
-      scorer.Score(state, prob, nextState);
+      scorer.Score(sentInd, state, prob, nextState);
     }
 
     // Looking at attention vectors

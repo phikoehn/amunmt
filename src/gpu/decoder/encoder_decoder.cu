@@ -43,7 +43,9 @@ EncoderDecoder::EncoderDecoder(const std::string& name,
   encoder_(new Encoder(model_)), decoder_(new Decoder(model_))
 {}
 
-void EncoderDecoder::Score(const State& in,
+void EncoderDecoder::Score(
+    size_t sentInd,
+    const State& in,
 		BaseMatrix& prob,
 		State& out) {
   const EDState& edIn = in.get<EDState>();
