@@ -42,7 +42,7 @@ class Scorer {
         BaseMatrix& prob,
         State& out) = 0;
 
-    virtual void BeginSentenceState(State& state) = 0;
+    virtual void BeginSentenceState(size_t sentInd, State& state) = 0;
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,

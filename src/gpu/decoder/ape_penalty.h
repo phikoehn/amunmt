@@ -46,7 +46,7 @@ class ApePenalty : public Scorer {
 
     virtual State* NewState();
 
-    virtual void BeginSentenceState(State& state);
+    virtual void BeginSentenceState(size_t sentInd, State& state);
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,

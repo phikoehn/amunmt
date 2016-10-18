@@ -41,7 +41,7 @@ class EncoderDecoder : public Scorer {
 
     virtual State* NewState();
 
-    virtual void BeginSentenceState(State& state);
+    virtual void BeginSentenceState(size_t sentInd, State& state);
 
     virtual void SetSource(size_t sentInd, const Sentence& source);
     virtual void SetSources(const Sentences& sources);
@@ -72,7 +72,7 @@ class EncoderDecoder : public Scorer {
     typedef std::vector<SourceContext> SourceContextes;
 
     SourceContext sourceContext_;
-    //SourceContextes sourceContextes_;
+    SourceContextes sourceContextes_;
 
 };
 

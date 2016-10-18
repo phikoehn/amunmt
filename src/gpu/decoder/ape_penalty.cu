@@ -51,7 +51,7 @@ State* ApePenalty::NewState() {
   return new ApePenaltyState();
 }
 
-void ApePenalty::BeginSentenceState(State& state) { }
+void ApePenalty::BeginSentenceState(size_t sentInd, State& state) { }
 
 void ApePenalty::AssembleBeamState(const State& in,
 							   const Beam& beam,

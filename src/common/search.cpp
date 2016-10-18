@@ -73,7 +73,7 @@ History Search::Decode(size_t sentInd, const Sentence *sentence) {
     states[i].reset(scorer.NewState());
     nextStates[i].reset(scorer.NewState());
 
-    scorer.BeginSentenceState(*states[i]);
+    scorer.BeginSentenceState(sentInd, *states[i]);
 
     probs[i] = scorer.CreateMatrix();
   }

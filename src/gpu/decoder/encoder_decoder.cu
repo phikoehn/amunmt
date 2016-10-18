@@ -61,10 +61,20 @@ State* EncoderDecoder::NewState() {
   return new EDState();
 }
 
-void EncoderDecoder::BeginSentenceState(State& state) {
+void EncoderDecoder::BeginSentenceState(size_t sentInd, State& state) {
   EDState& edState = state.get<EDState>();
   decoder_->EmptyState(edState.GetStates(), *sourceContext_, 1);
   decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
+}
+
+void EncoderDecoder::SetSources(const Sentences& sources)
+{
+  sourceContextes_.resize(sources.size());
+  for (size_t i = 0; i < sources.size(); ++i) {
+    sourceContextes_[i].reset(new mblas::Matrix());
+  }
+
+  encoder_->GetContext(sources, tab_, *sourceContext_);
 }
 
 void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
@@ -72,11 +82,6 @@ void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
   //cerr << "SetSource" << source.Debug() << endl;
   encoder_->GetContext(sentInd, source.GetWords(tab_),
                        *sourceContext_);
-}
-
-void EncoderDecoder::SetSources(const Sentences& sources)
-{
-  encoder_->GetContext(sources, tab_, *sourceContext_);
 }
 
 void EncoderDecoder::AssembleBeamState(const State& in,
