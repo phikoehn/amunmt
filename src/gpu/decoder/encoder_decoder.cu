@@ -74,14 +74,14 @@ void EncoderDecoder::SetSources(const Sentences& sources)
     sourceContextes_[i].reset(new mblas::Matrix());
   }
 
-  encoder_->GetContextes(sources, tab_, *sourceContext_);
+  encoder_->GetContextes(sources, tab_, sourceContextes_);
 }
 
 void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
   sourceContext_.reset(new mblas::Matrix());
   //cerr << "SetSource" << source.Debug() << endl;
   encoder_->GetContext(sentInd, source.GetWords(tab_),
-                       *sourceContext_);
+                       sourceContext_);
 }
 
 void EncoderDecoder::AssembleBeamState(const State& in,

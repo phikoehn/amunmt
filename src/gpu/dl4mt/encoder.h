@@ -76,10 +76,10 @@ class Encoder {
     Encoder(const Weights& model);
 
     void GetContext(size_t sentInd, const std::vector<size_t>& words,
-                    mblas::Matrix& Context);
+        EncoderDecoder::SourceContext& Context);
 
     void GetContextes(const Sentences& sentences, size_t tab,
-            mblas::Matrix& Context);
+        EncoderDecoder::SourceContextes &contextes);
 
   private:
     Embeddings<Weights::EncEmbeddings> embeddings_;
