@@ -13,13 +13,13 @@ Encoder::Encoder(const Weights& model)
 void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
     EncoderDecoder::SourceContext& context) {
   context->Resize(words.size(), forwardRnn_.GetStateLength() + backwardRnn_.GetStateLength());
-  cerr << "context=" << context->GetShape().Debug() << endl;
+  //cerr << "context=" << context->GetShape().Debug() << endl;
 
   EmbeddedSentence &embeddedSentenceFwd = embeddedSentencesFwd_[sentInd];
   EmbeddedSentence &embeddedSentenceBck = embeddedSentencesBck_[sentInd];
 
-  cerr << "embeddings_=" << embeddings_.w_.E_.GetShape().Debug() << endl;
-  cerr << "embeddedSentenceFwd=" << embeddedSentenceFwd.size() << endl;
+  //cerr << "embeddings_=" << embeddings_.w_.E_.GetShape().Debug() << endl;
+  //cerr << "embeddedSentenceFwd=" << embeddedSentenceFwd.size() << endl;
 
   forwardRnn_.InitializeState();
   forwardRnn_.GetContext(embeddedSentenceFwd.cbegin(),
@@ -57,8 +57,8 @@ void Encoder::GetContextes(const Sentences& sentences, size_t tab,
       mblas::Matrix &mBck = embeddedSentenceBck[i];
       embeddings_.Lookup(mBck, wordBck);
 
-      cerr << "mFwd=" << mFwd.GetShape().Debug() << endl;
-      cerr << "mBck=" << mBck.GetShape().Debug() << endl;
+      //cerr << "mFwd=" << mFwd.GetShape().Debug() << endl;
+      //cerr << "mBck=" << mBck.GetShape().Debug() << endl;
     }
   }
 }

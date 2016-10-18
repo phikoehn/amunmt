@@ -24,6 +24,7 @@ Search::~Search()
 Histories Search::Decode(const Sentences *sentences) {
   Histories ret;
 
+  cerr << "start batch" << endl;
   // batching
   for (size_t i = 0; i < scorers_.size(); i++) {
     Scorer &scorer = *scorers_[i];
@@ -37,6 +38,7 @@ Histories Search::Decode(const Sentences *sentences) {
     History history = Decode(i, sentence);
     ret.push_back(history);
   }
+  cerr << "end batch" << endl;
 
   return ret;
 }
