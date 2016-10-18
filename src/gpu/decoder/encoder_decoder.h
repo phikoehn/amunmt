@@ -70,7 +70,7 @@ class EncoderDecoder : public Scorer {
     std::unique_ptr<Encoder> encoder_;
     std::unique_ptr<Decoder> decoder_;
 
-    SourceContext sourceContext_;
+    //SourceContext sourceContext_;
     SourceContextes sourceContextes_;
 
 };

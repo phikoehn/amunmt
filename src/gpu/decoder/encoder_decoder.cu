@@ -54,7 +54,7 @@ void EncoderDecoder::Score(
   mblas::Matrix &probCast = static_cast<mblas::Matrix&>(prob);
   decoder_->MakeStep(edOut.GetStates(), probCast,
                      edIn.GetStates(), edIn.GetEmbeddings(),
-                     *sourceContext_);
+                     *sourceContextes_[sentInd]);
 }
 
 State* EncoderDecoder::NewState() {
@@ -63,7 +63,7 @@ State* EncoderDecoder::NewState() {
 
 void EncoderDecoder::BeginSentenceState(size_t sentInd, State& state) {
   EDState& edState = state.get<EDState>();
-  decoder_->EmptyState(edState.GetStates(), *sourceContext_, 1);
+  decoder_->EmptyState(edState.GetStates(), *sourceContextes_[sentInd], 1);
   decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
 }
 
@@ -78,10 +78,11 @@ void EncoderDecoder::SetSources(const Sentences& sources)
 }
 
 void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
-  sourceContext_.reset(new mblas::Matrix());
   //cerr << "SetSource" << source.Debug() << endl;
-  encoder_->GetContext(sentInd, source.GetWords(tab_),
-                       sourceContext_);
+  encoder_->GetContext(
+      sentInd,
+      source.GetWords(tab_),
+      sourceContextes_[sentInd]);
 }
 
 void EncoderDecoder::AssembleBeamState(const State& in,
