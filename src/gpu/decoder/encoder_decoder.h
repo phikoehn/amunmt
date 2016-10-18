@@ -28,6 +28,9 @@ class EncoderDecoder : public Scorer {
     typedef EncoderDecoderState EDState;
 
   public:
+    typedef std::unique_ptr<mblas::Matrix> SourceContext;
+    typedef std::vector<SourceContext> SourceContextes;
+
     EncoderDecoder(const std::string& name,
                    const YAML::Node& config,
                    size_t tab,
@@ -66,10 +69,6 @@ class EncoderDecoder : public Scorer {
     const Weights& model_;
     std::unique_ptr<Encoder> encoder_;
     std::unique_ptr<Decoder> decoder_;
-
-    //std::unique_ptr<mblas::Matrix> sourceContext_;
-    typedef std::unique_ptr<mblas::Matrix> SourceContext;
-    typedef std::vector<SourceContext> SourceContextes;
 
     SourceContext sourceContext_;
     SourceContextes sourceContextes_;

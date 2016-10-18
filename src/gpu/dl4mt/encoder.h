@@ -78,7 +78,7 @@ class Encoder {
     void GetContext(size_t sentInd, const std::vector<size_t>& words,
                     mblas::Matrix& Context);
 
-    void GetContext(const Sentences& sentences, size_t tab,
+    void GetContextes(const Sentences& sentences, size_t tab,
             mblas::Matrix& Context);
 
   private:

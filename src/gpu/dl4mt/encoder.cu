@@ -29,7 +29,7 @@ void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
 						  Context, true);
 }
 
-void Encoder::GetContext(const Sentences& sentences, size_t tab,
+void Encoder::GetContextes(const Sentences& sentences, size_t tab,
         mblas::Matrix& Context) {
   embeddedSentencesFwd_.resize(sentences.size());
   embeddedSentencesBck_.resize(sentences.size());

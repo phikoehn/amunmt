@@ -74,7 +74,7 @@ void EncoderDecoder::SetSources(const Sentences& sources)
     sourceContextes_[i].reset(new mblas::Matrix());
   }
 
-  encoder_->GetContext(sources, tab_, *sourceContext_);
+  encoder_->GetContextes(sources, tab_, *sourceContext_);
 }
 
 void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
