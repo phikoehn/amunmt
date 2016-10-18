@@ -40,8 +40,7 @@ EncoderDecoder::EncoderDecoder(const std::string& name,
                size_t tab,
                const Weights& model)
 : Scorer(name, config, tab), model_(model),
-  encoder_(new Encoder(model_)), decoder_(new Decoder(model_)),
-  SourceContext_(new mblas::Matrix())
+  encoder_(new Encoder(model_)), decoder_(new Decoder(model_))
 {}
 
 void EncoderDecoder::Score(const State& in,
@@ -53,7 +52,7 @@ void EncoderDecoder::Score(const State& in,
   mblas::Matrix &probCast = static_cast<mblas::Matrix&>(prob);
   decoder_->MakeStep(edOut.GetStates(), probCast,
                      edIn.GetStates(), edIn.GetEmbeddings(),
-                     *SourceContext_);
+                     *sourceContext_);
 }
 
 State* EncoderDecoder::NewState() {
@@ -62,19 +61,20 @@ State* EncoderDecoder::NewState() {
 
 void EncoderDecoder::BeginSentenceState(State& state) {
   EDState& edState = state.get<EDState>();
-  decoder_->EmptyState(edState.GetStates(), *SourceContext_, 1);
+  decoder_->EmptyState(edState.GetStates(), *sourceContext_, 1);
   decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
 }
 
 void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
+  sourceContext_.reset(new mblas::Matrix());
   //cerr << "SetSource" << source.Debug() << endl;
   encoder_->GetContext(sentInd, source.GetWords(tab_),
-                       *SourceContext_);
+                       *sourceContext_);
 }
 
 void EncoderDecoder::SetSources(const Sentences& sources)
 {
-  encoder_->GetContext(sources, tab_, *SourceContext_);
+  encoder_->GetContext(sources, tab_, *sourceContext_);
 }
 
 void EncoderDecoder::AssembleBeamState(const State& in,

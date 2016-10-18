@@ -65,7 +65,13 @@ class EncoderDecoder : public Scorer {
     std::unique_ptr<Encoder> encoder_;
     std::unique_ptr<Decoder> decoder_;
 
-    std::unique_ptr<mblas::Matrix> SourceContext_;
+    //std::unique_ptr<mblas::Matrix> sourceContext_;
+    typedef std::unique_ptr<mblas::Matrix> SourceContext;
+    typedef std::vector<SourceContext> SourceContextes;
+
+    SourceContext sourceContext_;
+    //SourceContextes sourceContextes_;
+
 };
 
 ////////////////////////////////////////////
