@@ -35,7 +35,7 @@ class Encoder {
         RNN(const Weights& model)
         : gru_(model) {}
 
-        void InitializeState(size_t batchSize = 1) {
+        void InitializeState(size_t batchSize) {
           states_.resize(batchSize);
 
           for (mblas::Matrix &state: states_) {
@@ -51,10 +51,10 @@ class Encoder {
         }
 
         template <class It>
-        void GetContext(It it, It end, 
+        void GetContext(size_t sentInd, It it, It end,
                         mblas::Matrix& Context, bool invert) {
 
-          mblas::Matrix &state = states_[0];
+          mblas::Matrix &state = states_[sentInd];
 
           size_t n = std::distance(it, end);
           size_t i = 0;

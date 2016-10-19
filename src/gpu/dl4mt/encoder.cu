@@ -21,13 +21,11 @@ void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
   //cerr << "embeddings_=" << embeddings_.w_.E_.GetShape().Debug() << endl;
   //cerr << "embeddedSentenceFwd=" << embeddedSentenceFwd.size() << endl;
 
-  forwardRnn_.InitializeState();
-  forwardRnn_.GetContext(embeddedSentenceFwd.cbegin(),
+  forwardRnn_.GetContext(sentInd, embeddedSentenceFwd.cbegin(),
       embeddedSentenceFwd.cend(),
 						 *context, false);
 
-  backwardRnn_.InitializeState();
-  backwardRnn_.GetContext(embeddedSentenceBck.cbegin(),
+  backwardRnn_.GetContext(sentInd, embeddedSentenceBck.cbegin(),
       embeddedSentenceBck.cend(),
 						  *context, true);
 }
@@ -36,6 +34,9 @@ void Encoder::GetContextes(const Sentences& sentences, size_t tab,
     EncoderDecoder::SourceContextes& contextes) {
   embeddedSentencesFwd_.resize(sentences.size());
   embeddedSentencesBck_.resize(sentences.size());
+
+  forwardRnn_.InitializeState(sentences.size());
+  backwardRnn_.InitializeState(sentences.size());
 
   for (size_t sentInd = 0; sentInd < sentences.size(); ++sentInd) {
     const Sentence *sentence = sentences.at(sentInd);
