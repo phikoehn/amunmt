@@ -12,22 +12,7 @@ Encoder::Encoder(const Weights& model)
 
 void Encoder::GetContext(size_t sentInd, const std::vector<size_t>& words,
     EncoderDecoder::SourceContext& context) {
-  context->Resize(words.size(), forwardRnn_.GetStateLength() + backwardRnn_.GetStateLength());
-  //cerr << "context=" << context->GetShape().Debug() << endl;
 
-  EmbeddedSentence &embeddedSentenceFwd = embeddedSentencesFwd_[sentInd];
-  EmbeddedSentence &embeddedSentenceBck = embeddedSentencesBck_[sentInd];
-
-  //cerr << "embeddings_=" << embeddings_.w_.E_.GetShape().Debug() << endl;
-  //cerr << "embeddedSentenceFwd=" << embeddedSentenceFwd.size() << endl;
-
-  forwardRnn_.GetContext(sentInd, embeddedSentenceFwd.cbegin(),
-      embeddedSentenceFwd.cend(),
-						 *context, false);
-
-  backwardRnn_.GetContext(sentInd, embeddedSentenceBck.cbegin(),
-      embeddedSentenceBck.cend(),
-						  *context, true);
 }
 
 void Encoder::GetContextes(const Sentences& sentences, size_t tab,
@@ -49,6 +34,7 @@ void Encoder::GetContextes(const Sentences& sentences, size_t tab,
     EmbeddedSentence & embeddedSentenceBck = embeddedSentencesBck_[sentInd];
     embeddedSentenceBck.resize(sentenceLen);
 
+    // looking embedding for each word in the sentence
     for (size_t i = 0; i < words.size(); ++i) {
       const Word &wordFwd = words[i];
       mblas::Matrix &mFwd = embeddedSentenceFwd[i];
@@ -61,6 +47,19 @@ void Encoder::GetContextes(const Sentences& sentences, size_t tab,
       //cerr << "mFwd=" << mFwd.GetShape().Debug() << endl;
       //cerr << "mBck=" << mBck.GetShape().Debug() << endl;
     }
+
+    // calc rnn
+    EncoderDecoder::SourceContext& context = contextes[sentInd];
+    context->Resize(sentenceLen, forwardRnn_.GetStateLength() + backwardRnn_.GetStateLength());
+
+    forwardRnn_.GetContext(sentInd, embeddedSentenceFwd.cbegin(),
+        embeddedSentenceFwd.cend(),
+               *context, false);
+
+    backwardRnn_.GetContext(sentInd, embeddedSentenceBck.cbegin(),
+        embeddedSentenceBck.cend(),
+                *context, true);
+
   }
 }
 
