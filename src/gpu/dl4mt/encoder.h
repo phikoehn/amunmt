@@ -36,8 +36,12 @@ class Encoder {
         : gru_(model) {}
 
         void InitializeState(size_t batchSize = 1) {
-          State_.Clear();
-          State_.Resize(1, gru_.GetStateLength(), 0.0);
+          states_.resize(batchSize);
+
+          for (mblas::Matrix &state: states_) {
+            state.Clear();
+            state.Resize(1, gru_.GetStateLength(), 0.0);
+          }
         }
 
         void GetNextState(mblas::Matrix& NextState,
@@ -50,14 +54,16 @@ class Encoder {
         void GetContext(It it, It end, 
                         mblas::Matrix& Context, bool invert) {
 
+          mblas::Matrix &state = states_[0];
+
           size_t n = std::distance(it, end);
           size_t i = 0;
           while(it != end) {
-            GetNextState(State_, State_, *it++);
+            GetNextState(state, state, *it++);
             if(invert)
-              mblas::PasteRow(Context, State_, n - i - 1, gru_.GetStateLength());
+              mblas::PasteRow(Context, state, n - i - 1, gru_.GetStateLength());
             else
-              mblas::PasteRow(Context, State_, i, 0);
+              mblas::PasteRow(Context, state, i, 0);
             ++i;
           }
 
@@ -73,7 +79,7 @@ class Encoder {
         // Model matrices
         const GRU<Weights> gru_;
 
-        mblas::Matrix State_;
+        std::vector<mblas::Matrix> states_;
     };
 
   public:
