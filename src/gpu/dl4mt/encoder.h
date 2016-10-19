@@ -17,10 +17,12 @@ class Encoder {
 
         void Lookup(mblas::Matrix& Row, size_t i) {
           using namespace mblas;
+          //std::cerr << "BEFORE Row=" << Row.GetShape().Debug() << std::endl;
           if(i < w_.E_.GetShape().rows)
             CopyRow(Row, w_.E_, i);
           else
             CopyRow(Row, w_.E_, 1); // UNK
+          //std::cerr << "AFTER Row=" << Row.GetShape().Debug() << std::endl;
         }
 
         const Weights& w_;
@@ -35,7 +37,7 @@ class Encoder {
 
         void InitializeState(size_t batchSize = 1) {
           State_.Clear();
-          State_.Resize(batchSize, gru_.GetStateLength(), 0.0);
+          State_.Resize(1, gru_.GetStateLength(), 0.0);
         }
 
         void GetNextState(mblas::Matrix& NextState,
@@ -58,6 +60,9 @@ class Encoder {
               mblas::PasteRow(Context, State_, i, 0);
             ++i;
           }
+
+          //std::cerr << "Context=" << Context.GetShape().Debug() << std::endl;
+          //std::cerr << "State_=" << State_.GetShape().Debug() << std::endl;
         }
 
         size_t GetStateLength() const {
