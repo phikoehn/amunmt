@@ -28,20 +28,27 @@ Histories Search::Decode(const Sentences *sentences) {
   // batching
   std::vector<States> batchStates(sentences->size());
   std::vector<States> batchNextStates(sentences->size());
+  std::vector<BaseMatrices> batchMatrices(sentences->size());
 
   for (size_t i = 0; i < sentences->size(); ++i) {
 	  States &states = batchStates[i];
 	  States &nextStates = batchNextStates[i];
+	  BaseMatrices &matrices = batchMatrices[i];
 
 	  states.resize(scorers_.size());
 	  nextStates.resize(scorers_.size());
+	  matrices.resize(scorers_.size());
+
+	  for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
+	    Scorer &scorer = *scorers_[scorerInd];
+	    matrices[scorerInd] = scorer.CreateMatrix();
+	  }
   }
 
   // encode
   for (size_t i = 0; i < scorers_.size(); i++) {
     Scorer &scorer = *scorers_[i];
     scorer.SetSources(*sentences);
-
   }
 
   // decode
@@ -49,8 +56,9 @@ Histories Search::Decode(const Sentences *sentences) {
     const Sentence *sentence = sentences->at(i);
     States &states = batchStates[i];
     States &nextStates = batchNextStates[i];
+	BaseMatrices &matrices = batchMatrices[i];
 
-    History history = Decode(i, sentence, states, nextStates);
+    History history = Decode(i, sentence, states, nextStates, matrices);
     ret.push_back(history);
   }
   cerr << "end batch" << endl;
@@ -62,7 +70,8 @@ History Search::Decode(
 		size_t sentInd,
 		const Sentence *sentence,
 		States &states,
-		States &nextStates) {
+		States &nextStates,
+		BaseMatrices &probs) {
   boost::timer::cpu_timer timer;
 
   size_t beamSize = God::Get<size_t>("beam-size");
@@ -75,8 +84,6 @@ History Search::Decode(
   History history;
   Beam prevHyps = { HypothesisPtr(new Hypothesis()) };
   history.Add(prevHyps);
-
-  BaseMatrices probs(scorers_.size());
 
   size_t vocabSize = scorers_[0]->GetVocabSize();
 
@@ -92,8 +99,6 @@ History Search::Decode(
     nextStates[i].reset(scorer.NewState());
 
     scorer.BeginSentenceState(sentInd, *states[i]);
-
-    probs[i] = scorer.CreateMatrix();
   }
 
   const size_t maxLength = sentence->GetWords().size() * 3;

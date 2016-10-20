@@ -21,6 +21,7 @@ class Search {
     		size_t sentInd,
     		const Sentence *sentence,
     		States &states,
-    		States &nextStates);
+    		States &nextStates,
+    		BaseMatrices &probs);
 
 };
