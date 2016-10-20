@@ -17,6 +17,10 @@ class Search {
     std::vector<ScorerPtr> scorers_;
     Words filterIndices_;
 
-    History Decode(size_t sentInd, const Sentence *sentence);
+    History Decode(
+    		size_t sentInd,
+    		const Sentence *sentence,
+    		States &states,
+    		States &nextStates);
 
 };

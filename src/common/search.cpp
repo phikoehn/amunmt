@@ -26,16 +26,31 @@ Histories Search::Decode(const Sentences *sentences) {
 
   cerr << "start batch" << endl;
   // batching
+  std::vector<States> batchStates(sentences->size());
+  std::vector<States> batchNextStates(sentences->size());
+
+  for (size_t i = 0; i < sentences->size(); ++i) {
+	  States &states = batchStates[i];
+	  States &nextStates = batchNextStates[i];
+
+	  states.resize(scorers_.size());
+	  nextStates.resize(scorers_.size());
+  }
+
+  // encode
   for (size_t i = 0; i < scorers_.size(); i++) {
     Scorer &scorer = *scorers_[i];
     scorer.SetSources(*sentences);
 
   }
 
-  // process individual sentences
+  // decode
   for (size_t i = 0; i < sentences->size(); ++i) {
     const Sentence *sentence = sentences->at(i);
-    History history = Decode(i, sentence);
+    States &states = batchStates[i];
+    States &nextStates = batchNextStates[i];
+
+    History history = Decode(i, sentence, states, nextStates);
     ret.push_back(history);
   }
   cerr << "end batch" << endl;
@@ -43,7 +58,11 @@ Histories Search::Decode(const Sentences *sentences) {
   return ret;
 }
 
-History Search::Decode(size_t sentInd, const Sentence *sentence) {
+History Search::Decode(
+		size_t sentInd,
+		const Sentence *sentence,
+		States &states,
+		States &nextStates) {
   boost::timer::cpu_timer timer;
 
   size_t beamSize = God::Get<size_t>("beam-size");
@@ -57,8 +76,6 @@ History Search::Decode(size_t sentInd, const Sentence *sentence) {
   Beam prevHyps = { HypothesisPtr(new Hypothesis()) };
   history.Add(prevHyps);
 
-  States states(scorers_.size());
-  States nextStates(scorers_.size());
   BaseMatrices probs(scorers_.size());
 
   size_t vocabSize = scorers_[0]->GetVocabSize();
