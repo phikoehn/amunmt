@@ -42,6 +42,12 @@ Histories Search::Decode(const Sentences *sentences) {
 	  for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
 	    Scorer &scorer = *scorers_[scorerInd];
 	    matrices[scorerInd] = scorer.CreateMatrix();
+
+	    StatePtr &state = states[scorerInd];
+	    StatePtr &nextState = nextStates[scorerInd];
+
+	    state.reset(scorer.NewState());
+	    nextState.reset(scorer.NewState());
 	  }
   }
 
@@ -94,10 +100,6 @@ History Search::Decode(
 
   for (size_t i = 0; i < scorers_.size(); i++) {
     Scorer &scorer = *scorers_[i];
-
-    states[i].reset(scorer.NewState());
-    nextStates[i].reset(scorer.NewState());
-
     scorer.BeginSentenceState(sentInd, *states[i]);
   }
 
