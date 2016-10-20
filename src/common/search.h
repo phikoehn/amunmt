@@ -10,7 +10,7 @@ class Search {
     Search(size_t threadId);
     virtual ~Search();
 
-    Histories Decode(const Sentences *sentences);
+    Histories Process(const Sentences *sentences);
 
   private:
     size_t MakeFilter(const Words& srcWords, const size_t vocabSize);

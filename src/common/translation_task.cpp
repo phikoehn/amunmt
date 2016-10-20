@@ -21,5 +21,5 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   }
 #endif
 
-  return search->Decode(sentences);
+  return search->Process(sentences);
 }

@@ -21,7 +21,7 @@ Search::~Search()
 {
 }
 
-Histories Search::Decode(const Sentences *sentences) {
+Histories Search::Process(const Sentences *sentences) {
   Histories ret;
 
   cerr << "start batch" << endl;
