@@ -70,7 +70,6 @@ History Search::Decode(size_t sentInd, const Sentence *sentence) {
 
   for (size_t i = 0; i < scorers_.size(); i++) {
     Scorer &scorer = *scorers_[i];
-    scorer.SetSource(sentInd, *sentence);
 
     states[i].reset(scorer.NewState());
     nextStates[i].reset(scorer.NewState());

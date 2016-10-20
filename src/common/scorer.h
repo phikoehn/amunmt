@@ -48,7 +48,6 @@ class Scorer {
                                    const Beam& beam,
                                    State& out) = 0;
 
-    virtual void SetSource(size_t sentInd, const Sentence& source) = 0;
     virtual void SetSources(const Sentences& sources) = 0;
 
     virtual void Filter(const std::vector<size_t>&) = 0;
@@ -79,7 +78,6 @@ class SourceIndependentScorer : public Scorer {
 
     virtual ~SourceIndependentScorer() {}
 
-    virtual void SetSource(size_t sentInd, const Sentence&) {}
 };
 
 typedef std::shared_ptr<Scorer> ScorerPtr;

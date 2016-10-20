@@ -77,14 +77,6 @@ void EncoderDecoder::SetSources(const Sentences& sources)
   encoder_->GetContextes(sources, tab_, sourceContextes_);
 }
 
-void EncoderDecoder::SetSource(size_t sentInd, const Sentence& source) {
-  //cerr << "SetSource" << source.Debug() << endl;
-  encoder_->GetContext(
-      sentInd,
-      source.GetWords(tab_),
-      sourceContextes_[sentInd]);
-}
-
 void EncoderDecoder::AssembleBeamState(const State& in,
                                const Beam& beam,
                                State& out) {
