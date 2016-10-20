@@ -64,6 +64,12 @@ Histories Search::Decode(const Sentences *sentences) {
     States &nextStates = batchNextStates[i];
 	BaseMatrices &matrices = batchMatrices[i];
 
+	for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
+	    Scorer &scorer = *scorers_[scorerInd];
+	    StatePtr &state = states[scorerInd];
+	    scorer.BeginSentenceState(i, *state);
+	}
+
     History history = Decode(i, sentence, states, nextStates, matrices);
     ret.push_back(history);
   }
@@ -96,11 +102,6 @@ History Search::Decode(
   bool filter = God::Get<std::vector<std::string>>("softmax-filter").size();
   if (filter) {
     vocabSize = MakeFilter(sentence->GetWords(), vocabSize);
-  }
-
-  for (size_t i = 0; i < scorers_.size(); i++) {
-    Scorer &scorer = *scorers_[i];
-    scorer.BeginSentenceState(sentInd, *states[i]);
   }
 
   const size_t maxLength = sentence->GetWords().size() * 3;
