@@ -102,9 +102,27 @@ class FastGRU {
       using namespace mblas;
       
       const size_t cols = GetStateLength();
+      std::cerr << "BEFORE cols=" << cols << " "
+    		  << NextState.GetShape().Debug() << " "
+    		  << State.GetShape().Debug() << " "
+    		  << Context.GetShape().Debug() << " "
+    		  << RUH_.GetShape().Debug() << " "
+    		  << WWx_.GetShape().Debug() << " "
+    		  << UUx_.GetShape().Debug() << " "
+    		  << std::endl;
+
       Prod(RUH_, Context, WWx_);
       Prod(Temp_, State, UUx_);
       ElementwiseOps(NextState, State, RUH_, Temp_);
+
+      std::cerr << "BEFORE cols=" << cols << " "
+    		  << NextState.GetShape().Debug() << " "
+    		  << State.GetShape().Debug() << " "
+    		  << Context.GetShape().Debug() << " "
+    		  << RUH_.GetShape().Debug() << " "
+    		  << WWx_.GetShape().Debug() << " "
+    		  << UUx_.GetShape().Debug() << " "
+    		  << std::endl;
     }
       
       
