@@ -40,7 +40,7 @@ class Scorer {
         size_t sentInd,
         const State& in,
         BaseMatrix& prob,
-        State& out) = 0;
+        State& out) const = 0;
 
     virtual void BeginSentenceState(size_t sentInd, State& state) = 0;
 

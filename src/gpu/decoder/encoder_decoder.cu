@@ -47,14 +47,22 @@ void EncoderDecoder::Score(
     size_t sentInd,
     const State& in,
 		BaseMatrix& prob,
-		State& out) {
+		State& out) const {
   const EDState& edIn = in.get<EDState>();
   EDState& edOut = out.get<EDState>();
+  cerr << "edIn=" << edIn.GetStates().GetShape().Debug() << endl;
+  cerr << "edIn=" << edIn.GetEmbeddings().GetShape().Debug() << endl;
+
+  cerr << "BEFORE edOut=" << edOut.GetStates().GetShape().Debug() << endl;
+  cerr << "BEFORE edOut=" << edOut.GetEmbeddings().GetShape().Debug() << endl;
 
   mblas::Matrix &probCast = static_cast<mblas::Matrix&>(prob);
   decoder_->MakeStep(edOut.GetStates(), probCast,
                      edIn.GetStates(), edIn.GetEmbeddings(),
                      *sourceContextes_[sentInd]);
+
+  cerr << "AFTER edOut=" << edOut.GetStates().GetShape().Debug() << endl;
+  cerr << "AFTER edOut=" << edOut.GetEmbeddings().GetShape().Debug() << endl;
 }
 
 State* EncoderDecoder::NewState() {

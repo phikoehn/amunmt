@@ -86,6 +86,7 @@ History Search::Decode(
 		BaseMatrices &probs) {
   boost::timer::cpu_timer timer;
 
+  //cerr << "probs=" << probs.size() << endl;
   size_t beamSize = God::Get<size_t>("beam-size");
   bool normalize = God::Get<bool>("normalize");
 
@@ -113,6 +114,8 @@ History Search::Decode(
       State &nextState = *nextStates[i];
 
       prob.Resize(beamSize, vocabSize);
+      //cerr << "prob=" << prob.GetShape().Debug() << endl;
+
       scorer.Score(sentInd, state, prob, nextState);
     }
 

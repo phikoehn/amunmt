@@ -40,7 +40,7 @@ class EncoderDecoder : public Scorer {
           size_t sentInd,
           const State& in,
           BaseMatrix& prob,
-          State& out);
+          State& out) const;
 
     virtual State* NewState();
 
