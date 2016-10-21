@@ -268,7 +268,9 @@ class Decoder {
                   const mblas::Matrix& State,
                   const mblas::Matrix& Embeddings,
                   const mblas::Matrix& SourceContext) {
+      //std::cerr << "HH1=" << NextState.GetShape().Debug() << std::endl;
       GetHiddenState(HiddenState_, State, Embeddings);
+
       GetAlignedSourceContext(AlignedSourceContext_, HiddenState_, SourceContext);
       GetNextState(NextState, HiddenState_, AlignedSourceContext_);
       GetProbs(Probs, NextState, Embeddings, AlignedSourceContext_);

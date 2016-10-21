@@ -102,16 +102,20 @@ class TMatrix : public BaseMatrix {
     {
       std::stringstream strm;
       strm << GetShape().Debug() << ":"; // ":\n";
+
+      float sum = 0;
       for (size_t row = 0; row < GetShape().rows; ++row) {
         //float rowSum = 0;
         for (size_t col = 0; col < GetShape().cols; ++col) {
-          strm << (*this)(row, col) << " ";
+          //strm << (*this)(row, col) << " ";
           //rowSum += (*this)(row, col);
+          sum += (*this)(row, col);
         }
-        strm << "; ";
+        //strm << "; ";
         //strm << std::endl;
         //strm << rowSum << " ";
       }
+      strm << sum;
       return strm.str();
     }
 
