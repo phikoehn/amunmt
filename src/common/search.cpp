@@ -62,13 +62,13 @@ Histories Search::Process(const Sentences *sentences) {
     const Sentence *sentence = sentences->at(i);
     States &states = batchStates[i];
     States &nextStates = batchNextStates[i];
-	BaseMatrices &matrices = batchMatrices[i];
+    BaseMatrices &matrices = batchMatrices[i];
 
-	for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
-	    Scorer &scorer = *scorers_[scorerInd];
-	    StatePtr &state = states[scorerInd];
-	    scorer.BeginSentenceState(i, *state);
-	}
+    for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
+        Scorer &scorer = *scorers_[scorerInd];
+        StatePtr &state = states[scorerInd];
+        scorer.BeginSentenceState(i, *state);
+    }
 
     History history = Decode(i, sentence, states, nextStates, matrices);
     ret.push_back(history);
