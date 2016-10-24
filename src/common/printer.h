@@ -10,7 +10,14 @@
 
 template <class OStream>
 void Printer(const History& history, size_t lineNo, OStream& out) {
-  std::string best = Join(God::Postprocess(God::GetTargetVocab()(history.Top().first)));
+
+  Vocab &targetVocab = God::GetTargetVocab();
+  Result top = history.Top();
+  const Words &topWords = top.first;
+
+  std::vector<std::string> words = God::Postprocess(targetVocab(topWords));
+  std::string best = Join(words);
+
   LOG(progress) << "Best translation: " << best;
 
   // if (God::Get<bool>("return-alignment")) {
@@ -37,13 +44,15 @@ void Printer(const History& history, size_t lineNo, OStream& out) {
     if(God::Get<bool>("wipo")) {
       out << "OUT: " << nbl.size() << std::endl;
     }
+
     for(size_t i = 0; i < nbl.size(); ++i) {
       const Result& result = nbl[i];
       const Words &words = result.first;
       const HypothesisPtr &hypo = result.second;
 
-      if(God::Get<bool>("wipo"))
+      if(God::Get<bool>("wipo")) {
         out << "OUT: ";
+      }
       out << lineNo << " ||| " << Join(God::Postprocess(God::GetTargetVocab()(words))) << " |||";
       for(size_t j = 0; j < hypo->GetCostBreakdown().size(); ++j) {
         out << " " << scorerNames[j] << "= " << hypo->GetCostBreakdown()[j];
