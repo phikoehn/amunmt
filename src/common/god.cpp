@@ -209,8 +209,12 @@ std::vector<std::string> God::Preprocess(size_t i, const std::vector<std::string
 
 std::vector<std::string> God::Postprocess(const std::vector<std::string>& input) {
   std::vector<std::string> processed = input;
+  //std::cerr << "input=" << DebugVec(input) << std::endl;
+  //std::cerr << "processed=" << DebugVec(processed) << std::endl;
+
   for (const auto& processor : Summon().postprocessors_) {
     processed = processor->Postprocess(processed);
+    //std::cerr << "processed=" << DebugVec(processed) << std::endl;
   }
   return processed;
 }

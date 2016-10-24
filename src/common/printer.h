@@ -8,14 +8,27 @@
 #include "common/vocab.h"
 #include "common/soft_alignment.h"
 
+template<typename T>
+inline std::string DebugVec(const std::vector<T> &vec) {
+  std::stringstream strm;
+  for (const T &obj: vec) {
+    strm << obj << " ";
+  }
+  return strm.str();
+}
+
 template <class OStream>
 void Printer(const History& history, size_t lineNo, OStream& out) {
 
   Vocab &targetVocab = God::GetTargetVocab();
   Result top = history.Top();
   const Words &topWords = top.first;
+  //std::cerr << "topWords=" << DebugVec(topWords) << std::endl;
 
-  std::vector<std::string> words = God::Postprocess(targetVocab(topWords));
+  std::vector<std::string> words = targetVocab(topWords);
+  //std::cerr << "words=" << DebugVec(words) << std::endl;
+
+  words = God::Postprocess(words);
   std::string best = Join(words);
 
   LOG(progress) << "Best translation: " << best;
