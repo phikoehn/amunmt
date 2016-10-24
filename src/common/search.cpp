@@ -22,15 +22,18 @@ Search::~Search()
 }
 
 Histories Search::Process(const Sentences *sentences) {
-  Histories ret;
+  size_t numSentences = sentences->size();
+
+  Histories histories;
+  histories.resize(numSentences);
 
   //cerr << "start batch" << endl;
   // batching
-  std::vector<States> batchStates(sentences->size());
-  std::vector<States> batchNextStates(sentences->size());
-  std::vector<BaseMatrices> batchMatrices(sentences->size());
+  std::vector<States> batchStates(numSentences);
+  std::vector<States> batchNextStates(numSentences);
+  std::vector<BaseMatrices> batchMatrices(numSentences);
 
-  for (size_t i = 0; i < sentences->size(); ++i) {
+  for (size_t i = 0; i < numSentences; ++i) {
 	  States &states = batchStates[i];
 	  States &nextStates = batchNextStates[i];
 	  BaseMatrices &matrices = batchMatrices[i];
@@ -58,7 +61,7 @@ Histories Search::Process(const Sentences *sentences) {
   }
 
   // decode
-  for (size_t i = 0; i < sentences->size(); ++i) {
+  for (size_t i = 0; i < numSentences; ++i) {
     const Sentence *sentence = sentences->at(i);
     States &states = batchStates[i];
     States &nextStates = batchNextStates[i];
@@ -70,20 +73,22 @@ Histories Search::Process(const Sentences *sentences) {
         scorer.BeginSentenceState(i, *state);
     }
 
-    History history = Decode(i, sentence, states, nextStates, matrices);
-    ret.push_back(history);
+    History &history = histories[i];
+    Decode(i, sentence, states, nextStates, matrices, history);
   }
   //cerr << "end batch" << endl;
 
-  return ret;
+  return histories;
 }
 
-History Search::Decode(
+void Search::Decode(
 		size_t sentInd,
 		const Sentence *sentence,
 		States &states,
 		States &nextStates,
-		BaseMatrices &probs) {
+		BaseMatrices &probs,
+		History &history) {
+
   boost::timer::cpu_timer timer;
 
   //cerr << "probs=" << probs.size() << endl;
@@ -94,7 +99,6 @@ History Search::Decode(
   // it should be enough to keep track of hypotheses in
   // separate History objects.
 
-  History history;
   Beam prevHyps = { HypothesisPtr(new Hypothesis()) };
   history.Add(prevHyps);
 
@@ -161,6 +165,4 @@ History Search::Decode(
 	  BaseMatrix *prob = probs[i];
 	  delete prob;
   }
-
-  return history;
 }
