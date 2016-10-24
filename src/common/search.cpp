@@ -24,7 +24,7 @@ Search::~Search()
 Histories Search::Process(const Sentences *sentences) {
   Histories ret;
 
-  cerr << "start batch" << endl;
+  //cerr << "start batch" << endl;
   // batching
   std::vector<States> batchStates(sentences->size());
   std::vector<States> batchNextStates(sentences->size());
@@ -73,7 +73,7 @@ Histories Search::Process(const Sentences *sentences) {
     History history = Decode(i, sentence, states, nextStates, matrices);
     ret.push_back(history);
   }
-  cerr << "end batch" << endl;
+  //cerr << "end batch" << endl;
 
   return ret;
 }

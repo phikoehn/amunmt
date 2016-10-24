@@ -58,7 +58,7 @@ class Decoder {
         void GetNextState(mblas::Matrix& NextState,
                           const mblas::Matrix& State,
                           const mblas::Matrix& Context) {
-          std::cerr << "RNNHidden" << std::endl;
+          //std::cerr << "RNNHidden" << std::endl;
           gru_.GetNextState(NextState, State, Context);
         }
 
@@ -79,7 +79,7 @@ class Decoder {
         void GetNextState(mblas::Matrix& NextState,
                           const mblas::Matrix& State,
                           const mblas::Matrix& Context) {
-          std::cerr << "RNNFinal" << std::endl;
+          //std::cerr << "RNNFinal" << std::endl;
           gru_.GetNextState(NextState, State, Context);
         }
 
@@ -169,16 +169,16 @@ class Decoder {
                m2.Set(i, j, v++);
              }
            }
-
+           /*
            std::cerr << "BEFORE m1=" << m1.Debug() << std::endl;
            std::cerr << "BEFORE m2=" << m2.Debug() << std::endl;
-
+		   */
            //Broadcast(_1 + _2, m1, m2);
            Broadcast(_1, m1, m2);
-
+           /*
            std::cerr << "AFTER  m1=" << m1.Debug() << std::endl;
            std::cerr << "AFTER  m2=" << m2.Debug() << std::endl;
-
+		   */
         }
     };
 
