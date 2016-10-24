@@ -124,7 +124,7 @@ class FastGRU {
     		  << WWx_.GetShape().Debug() << " "
     		  << UUx_.GetShape().Debug() << " "
     		  << std::endl;
-       */
+      */
     }
       
       
