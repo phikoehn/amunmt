@@ -104,10 +104,12 @@ void Search::Decode(
 
   size_t vocabSize = scorers_[0]->GetVocabSize();
 
+  /*
   bool filter = God::Get<std::vector<std::string>>("softmax-filter").size();
   if (filter) {
     vocabSize = MakeFilter(sentence->GetWords(), vocabSize);
   }
+  */
 
   const size_t maxLength = sentence->GetWords().size() * 3;
   do {
