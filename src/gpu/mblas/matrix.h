@@ -76,8 +76,8 @@ public:
 
   TMatrix(const TMatrix& m) = delete;
 
-  value_type operator()(size_t row, size_t col) const {
-    return data_[row * shape_.cols + col];
+  value_type operator()(size_t row, size_t col, size_t batches) const {
+    return data_[batches * shape_.GetMatrixSize() + row * shape_.cols + col];
   }
 
   void Set(size_t row, size_t col, size_t batches, float value)  {
@@ -109,7 +109,7 @@ public:
       for (size_t col = 0; col < GetShape().cols; ++col) {
         //strm << (*this)(row, col) << " ";
         //rowSum += (*this)(row, col);
-        sum += (*this)(row, col);
+        sum += (*this)(row, col, 0);
       }
       //strm << "; ";
       //strm << std::endl;
