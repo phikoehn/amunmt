@@ -154,7 +154,7 @@ class Decoder {
         void Temp() {
           using namespace mblas;
 
-          GPU::mblas::Matrix m1(2,3);
+          GPU::mblas::Matrix m1(2,3,1);
            float v = 1;
            for (size_t i = 0; i < 2; ++i) {
              for (size_t j = 0; j < 3; ++j) {
@@ -162,7 +162,7 @@ class Decoder {
              }
            }
 
-           GPU::mblas::Matrix m2(4,3);
+           GPU::mblas::Matrix m2(4,3,1);
            v = 10;
            for (size_t i = 0; i < 4; ++i) {
              for (size_t j = 0; j < 3; ++j) {
