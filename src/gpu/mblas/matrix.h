@@ -59,13 +59,13 @@ class TMatrix : public BaseMatrix {
     :BaseMatrix()
     {}
 
-    TMatrix(size_t rows, size_t cols, size_t batches)
-    : BaseMatrix(rows, cols, batches)
+    TMatrix(size_t rows, size_t cols)
+    : BaseMatrix(rows, cols)
     , data_(shape_.GetSize())
     {}
 
-    TMatrix(size_t rows, size_t cols, size_t batches, value_type val)
-    : BaseMatrix(rows, cols, batches)
+    TMatrix(size_t rows, size_t cols, value_type val)
+    : BaseMatrix(rows, cols)
     , data_(shape_.GetSize(), val)
     {}
 
@@ -95,7 +95,7 @@ class TMatrix : public BaseMatrix {
     }
 
     void Reserve(size_t rows, size_t cols) {
-      data_.reserve(shape_.GetSize());
+      data_.reserve(rows * cols);
     }
 
     virtual std::string Debug() const
@@ -182,7 +182,7 @@ class TMatrix : public BaseMatrix {
 
 	  M& Probs = static_cast<M&>(*ProbsEnsemble[0]);
 
-	  M Costs(Probs.GetShape().rows, 1, 1);
+	  M Costs(Probs.GetShape().rows, 1);
 	  HostVector<float> vCosts;
 	  for(auto& h : prevHyps)
 		vCosts.push_back(h->GetCost());

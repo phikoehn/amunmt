@@ -23,7 +23,7 @@ class Shape
 public:
   size_t rows, cols, batches;
 
-  Shape(size_t rows, size_t cols, size_t batches)
+  Shape(size_t rows, size_t cols, size_t batches = 1)
   {
     Resize(rows, cols, batches);
   }
@@ -37,13 +37,8 @@ public:
   }
 
   size_t GetSize() const {
-    return GetMatrixSize() * batches;
+    return rows * cols * batches;
   }
-
-  size_t GetMatrixSize() const {
-    return rows * cols;
-  }
-
 };
 
 ///////////////////////////////////////////////////////////////////
