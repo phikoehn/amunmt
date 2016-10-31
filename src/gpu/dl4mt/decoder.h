@@ -123,7 +123,7 @@ class Decoder {
           size_t rows1 = SourceContext.GetShape().rows;
           size_t rows2 = HiddenState.GetShape().rows;
           A_.GetShape().Resize(rows2, rows1); // due to broadcasting above
-          Element(_1 + w_.C_(0,0), A_);
+          Element(_1 + w_.C_(0,0,0), A_);
 
           mblas::Softmax(A_);
           Prod(AlignedSourceContext, A_, SourceContext);
@@ -158,7 +158,7 @@ class Decoder {
            float v = 1;
            for (size_t i = 0; i < 2; ++i) {
              for (size_t j = 0; j < 3; ++j) {
-               m1.Set(i, j, v++);
+               m1.Set(i, j, 0, v++);
              }
            }
 
@@ -166,7 +166,7 @@ class Decoder {
            v = 10;
            for (size_t i = 0; i < 4; ++i) {
              for (size_t j = 0; j < 3; ++j) {
-               m2.Set(i, j, v++);
+               m2.Set(i, j, 0, v++);
              }
            }
            /*
