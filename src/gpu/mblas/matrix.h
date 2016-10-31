@@ -76,12 +76,12 @@ public:
 
   TMatrix(const TMatrix& m) = delete;
 
-  value_type operator()(size_t i, size_t j) const {
-    return data_[i * shape_.cols + j];
+  value_type operator()(size_t row, size_t col) const {
+    return data_[row * shape_.cols + col];
   }
 
-  void Set(size_t i, size_t j, float value)  {
-    data_[i * shape_.cols + j] = value;
+  void Set(size_t row, size_t col, size_t batches, float value)  {
+    data_[batches * shape_.GetMatrixSize() + row * shape_.cols + col] = value;
   }
 
   void Resize(size_t rows, size_t cols) {
@@ -204,7 +204,7 @@ public:
     // @TODO: make this more efficient
     if (!God::Get<bool>("allow-unk")) {
       for(size_t i = 0; i < Probs.GetShape().rows; i++)
-        Probs.Set(i, UNK, std::numeric_limits<float>::lowest());
+        Probs.Set(i, UNK, 0, std::numeric_limits<float>::lowest());
     }
 
     /*
