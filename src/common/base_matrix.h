@@ -54,7 +54,7 @@ public:
   {
   }
 
-  BaseMatrix(size_t rows, size_t cols, size_t batches = 1)
+  BaseMatrix(size_t rows, size_t cols, size_t batches)
   :shape_(rows, cols, batches)
   {
   }

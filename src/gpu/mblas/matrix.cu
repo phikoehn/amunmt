@@ -27,7 +27,7 @@ void Mean(Matrix& Out, const Matrix& In) {
   size_t n = In.GetShape().cols;
 
   Out.Resize(1, n, 0.f);
-  Matrix Ones(1, m, 1.f);
+  Matrix Ones(1, m, 1, 1.f);
 
   float alpha = 1.0 / m;
   float beta  = 0.0;

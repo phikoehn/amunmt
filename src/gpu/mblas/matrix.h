@@ -59,18 +59,18 @@ public:
   :BaseMatrix()
   {}
 
-  TMatrix(size_t rows, size_t cols)
-  : BaseMatrix(rows, cols)
+  TMatrix(size_t rows, size_t cols, size_t batches)
+  : BaseMatrix(rows, cols, batches)
   , data_(shape_.GetSize())
   {}
 
-  TMatrix(size_t rows, size_t cols, value_type val)
-  : BaseMatrix(rows, cols)
+  TMatrix(size_t rows, size_t cols, size_t batches, value_type val)
+  : BaseMatrix(rows, cols, batches)
   , data_(shape_.GetSize(), val)
   {}
 
   TMatrix(TMatrix&& m)
-  : BaseMatrix(m.shape_.rows, m.shape_.cols)
+  : BaseMatrix(m.shape_.rows, m.shape_.cols, m.shape_.batches)
   , data_(std::move(m.data_))
   {}
 
@@ -182,7 +182,7 @@ public:
 
     M& Probs = static_cast<M&>(*ProbsEnsemble[0]);
 
-    M Costs(Probs.GetShape().rows, 1);
+    M Costs(Probs.GetShape().rows, 1, 1);
     HostVector<float> vCosts;
     for(auto& h : prevHyps)
       vCosts.push_back(h->GetCost());
@@ -433,7 +433,7 @@ void Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stre
   size_t rows = rows1 * rows2;
   size_t cols  = Out.GetShape().cols;
 
-  Matrix Temp(rows, cols, 1.0);
+  Matrix Temp(rows, cols, 1, 1.0);
 
   float* d_out = Temp.data();
   const float* d_in1 = Out.data();
