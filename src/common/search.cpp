@@ -23,6 +23,7 @@ Search::~Search()
 
 Histories Search::Process(const Sentences *sentences) {
   size_t numSentences = sentences->size();
+  size_t beamSize = God::Get<size_t>("beam-size");
 
   Histories histories;
   histories.resize(numSentences);
@@ -79,7 +80,13 @@ Histories Search::Process(const Sentences *sentences) {
     State &state = *states[0];
     State &nextState = *nextStates[0];
 
-    Decode(i, sentence, state, nextState, matrices, history);
+    BaseMatrix *prob = matrices[0];
+    size_t vocabSize = scorers_[0]->GetVocabSize();
+    prob->Resize(beamSize, vocabSize);
+
+    Decode(i, sentence, state, nextState, prob, history);
+
+    delete prob;
   }
   //cerr << "end batch" << endl;
 
@@ -91,22 +98,19 @@ void Search::Decode(
 		const Sentence *sentence,
 		State &state,
 		State &nextState,
-		BaseMatrices &probs,
+		BaseMatrix *prob,
 		History &history) {
 
   boost::timer::cpu_timer timer;
 
   //cerr << "probs=" << probs.size() << endl;
-  size_t beamSize = God::Get<size_t>("beam-size");
   bool normalize = God::Get<bool>("normalize");
+  size_t beamSize = God::Get<size_t>("beam-size");
   size_t vocabSize = scorers_[0]->GetVocabSize();
 
   assert(scorers_.size() == 1);
-
   Scorer &scorer = *scorers_[0];
-  BaseMatrix *prob = probs[0];
 
-  prob->Resize(beamSize, vocabSize);
   //cerr << "prob=" << prob.GetShape().Debug() << endl;
 
 
@@ -164,5 +168,4 @@ void Search::Decode(
   // cleanup
   scorer.CleanUpAfterSentence();
 
-  delete prob;
 }

@@ -22,7 +22,7 @@ class Search {
     		const Sentence *sentence,
     		State &state,
     		State &nextState,
-    		BaseMatrices &probs,
+    		BaseMatrix *prob,
     		History &history);
 
 };
