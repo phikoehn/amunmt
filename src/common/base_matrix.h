@@ -73,12 +73,10 @@ public:
 
   virtual void BestHyps(Beam& bestHyps,
       const Beam& prevHyps,
-      BaseMatrix& Probs,
       const size_t beamSize,
-      History& history,
       const std::vector<ScorerPtr> &scorers,
       const Words &filterIndices,
-      bool returnAlignment=false) const = 0;
+      bool returnAlignment=false) = 0;
 
   virtual std::string Debug() const = 0;
 

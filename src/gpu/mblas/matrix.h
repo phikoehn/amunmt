@@ -168,19 +168,17 @@ public:
 
   virtual void BestHyps(Beam& bestHyps,
       const Beam& prevHyps,
-      BaseMatrix& ProbsIn,
       const size_t beamSize,
-      History& history,
       const std::vector<ScorerPtr> &scorers,
       const Words &filterIndices,
-      bool returnAlignment) const
+      bool returnAlignment)
   {
     using namespace mblas;
     typedef TMatrix<VecType> M;
 
     auto& weights = God::GetScorerWeights();
 
-    M& Probs = static_cast<M&>(ProbsIn);
+    M& Probs = static_cast<M&>(*this);
 
     M Costs(Probs.GetShape().rows, 1, 1);
     HostVector<float> vCosts;
