@@ -190,12 +190,6 @@ public:
 
     BroadcastVecColumn(weights[scorers[0]->GetName()] * _1 + _2,
         Probs, Costs);
-    for(size_t i = 1; i < ProbsEnsemble.size(); ++i) {
-      M &currProbs = static_cast<M&>(*ProbsEnsemble[i]);
-
-      Element(_1 + weights[scorers[i]->GetName()] * _2,
-          Probs, currProbs);
-    }
 
     DeviceVector<unsigned> keys(Probs.size());
     HostVector<unsigned> bestKeys(beamSize);
@@ -246,14 +240,6 @@ public:
     bool doBreakdown = God::Get<bool>("n-best");
     if (doBreakdown) {
       breakDowns.push_back(bestCosts);
-      for (size_t i = 1; i < ProbsEnsemble.size(); ++i) {
-        HostVector<float> modelCosts(beamSize);
-        M &currProbs = static_cast<M&>(*ProbsEnsemble[i]);
-
-        auto it = iteralgo::make_permutation_iterator(currProbs.begin(), keys.begin());
-        algo::copy(it, it + beamSize, modelCosts.begin());
-        breakDowns.push_back(modelCosts);
-      }
     }
 
 
@@ -288,22 +274,10 @@ public:
       }
 
       if(doBreakdown) {
-        hyp->GetCostBreakdown().resize(ProbsEnsemble.size());
+        hyp->GetCostBreakdown().resize(1);
+        hyp->GetCostBreakdown()[0] = breakDowns[0][0];
         float sum = 0;
-        for (size_t j = 0; j < ProbsEnsemble.size(); ++j) {
-          if (j == 0)
-            hyp->GetCostBreakdown()[0] = breakDowns[0][i];
-          else {
-            float cost = 0;
-            if (j < ProbsEnsemble.size()) {
-              if(prevHyps[hypIndex]->GetCostBreakdown().size() < ProbsEnsemble.size())
-                const_cast<HypothesisPtr&>(prevHyps[hypIndex])->GetCostBreakdown().resize(ProbsEnsemble.size(), 0.0);
-              cost = breakDowns[j][i] + const_cast<HypothesisPtr&>(prevHyps[hypIndex])->GetCostBreakdown()[j];
-            }
-            sum += weights[scorers[j]->GetName()] * cost;
-            hyp->GetCostBreakdown()[j] = cost;
-          }
-        }
+
         hyp->GetCostBreakdown()[0] -= sum;
         hyp->GetCostBreakdown()[0] /= weights[scorers[0]->GetName()];
       }
