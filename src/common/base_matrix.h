@@ -73,7 +73,7 @@ public:
 
   virtual void BestHyps(Beam& bestHyps,
       const Beam& prevHyps,
-      const BaseMatrices& ProbsEnsemble,
+      BaseMatrix& Probs,
       const size_t beamSize,
       History& history,
       const std::vector<ScorerPtr> &scorers,

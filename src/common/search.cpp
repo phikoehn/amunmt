@@ -137,7 +137,7 @@ void Search::Decode(
 
     bool returnAlignment = God::Get<bool>("return-alignment");
 
-    prob->BestHyps(hyps, prevHyps, probs, beamSize, history, scorers_, filterIndices_, returnAlignment);
+    prob->BestHyps(hyps, prevHyps, *prob, beamSize, history, scorers_, filterIndices_, returnAlignment);
     history.Add(hyps, history.size() == maxLength);
 
     Beam survivors;

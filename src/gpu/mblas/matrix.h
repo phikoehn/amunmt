@@ -168,7 +168,7 @@ public:
 
   virtual void BestHyps(Beam& bestHyps,
       const Beam& prevHyps,
-      const BaseMatrices& ProbsEnsemble,
+      BaseMatrix& ProbsIn,
       const size_t beamSize,
       History& history,
       const std::vector<ScorerPtr> &scorers,
@@ -180,7 +180,7 @@ public:
 
     auto& weights = God::GetScorerWeights();
 
-    M& Probs = static_cast<M&>(*ProbsEnsemble[0]);
+    M& Probs = static_cast<M&>(ProbsIn);
 
     M Costs(Probs.GetShape().rows, 1, 1);
     HostVector<float> vCosts;
