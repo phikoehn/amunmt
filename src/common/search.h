@@ -20,8 +20,8 @@ class Search {
     void Decode(
     		size_t sentInd,
     		const Sentence *sentence,
-    		States &states,
-    		States &nextStates,
+    		State &state,
+    		State &nextState,
     		BaseMatrices &probs,
     		History &history);
 

@@ -74,7 +74,12 @@ Histories Search::Process(const Sentences *sentences) {
     }
 
     History &history = histories[i];
-    Decode(i, sentence, states, nextStates, matrices, history);
+
+    // 1st scorer only
+    State &state = *states[0];
+    State &nextState = *nextStates[0];
+
+    Decode(i, sentence, state, nextState, matrices, history);
   }
   //cerr << "end batch" << endl;
 
@@ -84,8 +89,8 @@ Histories Search::Process(const Sentences *sentences) {
 void Search::Decode(
 		size_t sentInd,
 		const Sentence *sentence,
-		States &states,
-		States &nextStates,
+		State &state,
+		State &nextState,
 		BaseMatrices &probs,
 		History &history) {
 
@@ -104,6 +109,7 @@ void Search::Decode(
   prob->Resize(beamSize, vocabSize);
   //cerr << "prob=" << prob.GetShape().Debug() << endl;
 
+
   // @TODO Future: in order to do batch sentence decoding
   // it should be enough to keep track of hypotheses in
   // separate History objects.
@@ -120,9 +126,6 @@ void Search::Decode(
 
   const size_t maxLength = sentence->GetWords().size() * 3;
   do {
-    State &state = *states[0];
-    State &nextState = *nextStates[0];
-
     scorer.Score(sentInd, state, *prob, nextState);
 
     // Looking at attention vectors
@@ -148,9 +151,8 @@ void Search::Decode(
       break;
     }
 
-    for (size_t i = 0; i < scorers_.size(); i++) {
-      scorers_[i]->AssembleBeamState(*nextStates[i], survivors, *states[i]);
-    }
+
+    scorer.AssembleBeamState(nextState, survivors, state);
 
     prevHyps.swap(survivors);
 
