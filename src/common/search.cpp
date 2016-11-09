@@ -94,6 +94,15 @@ void Search::Decode(
   //cerr << "probs=" << probs.size() << endl;
   size_t beamSize = God::Get<size_t>("beam-size");
   bool normalize = God::Get<bool>("normalize");
+  size_t vocabSize = scorers_[0]->GetVocabSize();
+
+  assert(scorers_.size() == 1);
+
+  Scorer &scorer = *scorers_[0];
+  BaseMatrix *prob = probs[0];
+
+  prob->Resize(beamSize, vocabSize);
+  //cerr << "prob=" << prob.GetShape().Debug() << endl;
 
   // @TODO Future: in order to do batch sentence decoding
   // it should be enough to keep track of hypotheses in
@@ -101,8 +110,6 @@ void Search::Decode(
 
   Beam prevHyps = { HypothesisPtr(new Hypothesis()) };
   history.Add(prevHyps);
-
-  size_t vocabSize = scorers_[0]->GetVocabSize();
 
   /*
   bool filter = God::Get<std::vector<std::string>>("softmax-filter").size();
@@ -113,17 +120,10 @@ void Search::Decode(
 
   const size_t maxLength = sentence->GetWords().size() * 3;
   do {
-    for (size_t i = 0; i < scorers_.size(); i++) {
-      Scorer &scorer = *scorers_[i];
-      BaseMatrix &prob = *probs[i];
-      State &state = *states[i];
-      State &nextState = *nextStates[i];
+    State &state = *states[0];
+    State &nextState = *nextStates[0];
 
-      prob.Resize(beamSize, vocabSize);
-      //cerr << "prob=" << prob.GetShape().Debug() << endl;
-
-      scorer.Score(sentInd, state, prob, nextState);
-    }
+    scorer.Score(sentInd, state, *prob, nextState);
 
     // Looking at attention vectors
     // mblas::Matrix A;
@@ -131,11 +131,10 @@ void Search::Decode(
     // mblas::debug1(A, 0, sentence.GetWords().size());
 
     Beam hyps;
-    const BaseMatrix &firstMatrix = *probs[0];
 
     bool returnAlignment = God::Get<bool>("return-alignment");
 
-    firstMatrix.BestHyps(hyps, prevHyps, probs, beamSize, history, scorers_, filterIndices_, returnAlignment);
+    prob->BestHyps(hyps, prevHyps, probs, beamSize, history, scorers_, filterIndices_, returnAlignment);
     history.Add(hyps, history.size() == maxLength);
 
     Beam survivors;
@@ -160,11 +159,8 @@ void Search::Decode(
   LOG(progress) << "Line " << sentence->GetLine()
 	              << ": Search took " << timer.format(3, "%ws");
 
-  for (size_t i = 0; i < scorers_.size(); i++) {
-	  Scorer &scorer = *scorers_[i];
-	  scorer.CleanUpAfterSentence();
+  // cleanup
+  scorer.CleanUpAfterSentence();
 
-	  BaseMatrix *prob = probs[i];
-	  delete prob;
-  }
+  delete prob;
 }
