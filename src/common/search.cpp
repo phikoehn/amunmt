@@ -43,23 +43,19 @@ Histories Search::Process(const Sentences *sentences) {
 	  nextStates.resize(scorers_.size());
 	  matrices.resize(scorers_.size());
 
-	  for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
-	    Scorer &scorer = *scorers_[scorerInd];
-	    matrices[scorerInd] = scorer.CreateMatrix();
+    Scorer &scorer = *scorers_[0];
+    matrices[0] = scorer.CreateMatrix();
 
-	    StatePtr &state = states[scorerInd];
-	    StatePtr &nextState = nextStates[scorerInd];
+    StatePtr &state = states[0];
+    StatePtr &nextState = nextStates[0];
 
-	    state.reset(scorer.NewState());
-	    nextState.reset(scorer.NewState());
-	  }
+    state.reset(scorer.NewState());
+    nextState.reset(scorer.NewState());
   }
 
   // encode
-  for (size_t i = 0; i < scorers_.size(); i++) {
-    Scorer &scorer = *scorers_[i];
-    scorer.SetSources(*sentences);
-  }
+  Scorer &scorer = *scorers_[0];
+  scorer.SetSources(*sentences);
 
   // decode
   for (size_t i = 0; i < numSentences; ++i) {
@@ -68,23 +64,19 @@ Histories Search::Process(const Sentences *sentences) {
     States &nextStates = batchNextStates[i];
     BaseMatrices &matrices = batchMatrices[i];
 
-    for (size_t scorerInd = 0; scorerInd < scorers_.size(); scorerInd++) {
-        Scorer &scorer = *scorers_[scorerInd];
-        StatePtr &state = states[scorerInd];
-        scorer.BeginSentenceState(i, *state);
-    }
+    Scorer &scorer = *scorers_[0];
+    StatePtr &state = states[0];
+    StatePtr &nextState = nextStates[0];
+    scorer.BeginSentenceState(i, *state);
 
     History &history = histories[i];
 
-    // 1st scorer only
-    State &state = *states[0];
-    State &nextState = *nextStates[0];
 
     BaseMatrix *prob = matrices[0];
     size_t vocabSize = scorers_[0]->GetVocabSize();
     prob->Resize(beamSize, vocabSize);
 
-    Decode(i, sentence, state, nextState, prob, history);
+    Decode(i, sentence, *state, *nextState, prob, history);
 
     delete prob;
   }
