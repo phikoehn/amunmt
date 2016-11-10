@@ -176,7 +176,7 @@ public:
     using namespace mblas;
     typedef TMatrix<VecType> M;
 
-    auto& weights = God::GetScorerWeights();
+    const std::map<std::string, float>& weights = God::GetScorerWeights();
 
     M& Probs = static_cast<M&>(*this);
 
@@ -186,7 +186,8 @@ public:
       vCosts.push_back(h->GetCost());
     algo::copy(vCosts.begin(), vCosts.end(), Costs.begin());
 
-    BroadcastVecColumn(weights[scorers[0]->GetName()] * _1 + _2,
+    float weight = weights.at(scorers[0]->GetName());
+    BroadcastVecColumn(weight * _1 + _2,
         Probs, Costs);
 
     DeviceVector<unsigned> keys(Probs.size());
@@ -277,7 +278,7 @@ public:
         float sum = 0;
 
         hyp->GetCostBreakdown()[0] -= sum;
-        hyp->GetCostBreakdown()[0] /= weights[scorers[0]->GetName()];
+        hyp->GetCostBreakdown()[0] /= weight;
       }
       bestHyps.push_back(hyp);
     }
