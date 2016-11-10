@@ -32,19 +32,17 @@ Histories Search::Process(const Sentences *sentences) {
   // batching
   std::vector<States> batchStates(numSentences);
   std::vector<States> batchNextStates(numSentences);
-  std::vector<BaseMatrices> batchMatrices(numSentences);
+  std::vector<BaseMatrix*> matrices(numSentences);
 
   for (size_t i = 0; i < numSentences; ++i) {
 	  States &states = batchStates[i];
 	  States &nextStates = batchNextStates[i];
-	  BaseMatrices &matrices = batchMatrices[i];
 
 	  states.resize(scorers_.size());
 	  nextStates.resize(scorers_.size());
-	  matrices.resize(scorers_.size());
 
     Scorer &scorer = *scorers_[0];
-    matrices[0] = scorer.CreateMatrix();
+    matrices[i] = scorer.CreateMatrix();
 
     StatePtr &state = states[0];
     StatePtr &nextState = nextStates[0];
@@ -62,7 +60,7 @@ Histories Search::Process(const Sentences *sentences) {
     const Sentence *sentence = sentences->at(i);
     States &states = batchStates[i];
     States &nextStates = batchNextStates[i];
-    BaseMatrices &matrices = batchMatrices[i];
+    BaseMatrix *prob = matrices[i];
 
     Scorer &scorer = *scorers_[0];
     StatePtr &state = states[0];
@@ -71,8 +69,6 @@ Histories Search::Process(const Sentences *sentences) {
 
     History &history = histories[i];
 
-
-    BaseMatrix *prob = matrices[0];
     size_t vocabSize = scorers_[0]->GetVocabSize();
     prob->Resize(beamSize, vocabSize);
 
