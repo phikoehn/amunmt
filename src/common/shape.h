@@ -28,10 +28,10 @@
   /**
    * @brief Represents the size of each dimension in a tensor.
    *
-   * Note: this class currently is hard-coded to four dimensions.
+   * Note: this class currently is hard-coded to 3 dimensions.
    */
 
-  const size_t SHAPE_SIZE = 2;
+  const size_t SHAPE_SIZE = 3;
 
 
   struct Shape {
@@ -43,7 +43,7 @@
        * This default shape has four dimensions.
        * The size of each dimension is 1.
        */
-      Shape() : shape_{1, 1} { }
+      Shape() : shape_{1, 1, 1} { }
 
       /**
        * @brief Constructs a shape.
@@ -83,7 +83,7 @@
 	   *
 	   * @return the number of dimensions represented by this object
 	   */
-      size_t size() const {
+      size_t numDimensions() const {
         return SHAPE_SIZE;
       }
 
@@ -96,7 +96,7 @@
        */
       size_t elements() const {
         size_t s = 1;
-        for(int i = 0; i < size(); ++i)
+        for(int i = 0; i < numDimensions(); ++i)
           s *= shape_[i];
         return s;
       }
@@ -137,7 +137,7 @@
 
       size_t numSlices() const {
         size_t s = 1;
-        for(int i = 2; i < size(); ++i)
+        for(int i = 2; i < numDimensions(); ++i)
           s *= shape_[i];
         return s;
       }

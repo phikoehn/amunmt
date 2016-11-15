@@ -29,13 +29,13 @@ class TMatrix : public BaseMatrix {
     {}
 
     TMatrix(int rows, int cols)
-    : BaseMatrix(rows, cols)
-    , data_(shape_.matrixSize())
+    : BaseMatrix(rows, cols, 1)
+    , data_(shape_.elements())
     {}
 
     TMatrix(int rows, int cols, value_type val)
-    : BaseMatrix(rows, cols)
-    , data_(shape_.matrixSize(), val)
+    : BaseMatrix(rows, cols, 1)
+    , data_(shape_.elements(), val)
     {}
 
     TMatrix(TMatrix&& m)
@@ -65,7 +65,7 @@ class TMatrix : public BaseMatrix {
       Reshape(rows, cols);
 
       if (shape_.matrixSize() > data_.size()) {
-        data_.resize(shape_.matrixSize());
+        data_.resize(shape_.elements());
       }
     }
 

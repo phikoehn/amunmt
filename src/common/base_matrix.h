@@ -16,11 +16,11 @@ typedef std::shared_ptr<Scorer> ScorerPtr;
 class BaseMatrix {
   public:
   BaseMatrix()
-  : shape_({0, 0})
+  : shape_({0, 0, 0})
   {}
 
-  BaseMatrix(int rows, int cols)
-  : shape_({rows, cols})
+  BaseMatrix(int rows, int cols, int batchSize)
+  : shape_({rows, cols, batchSize})
   {}
 
   BaseMatrix(const BaseMatrix &m)
