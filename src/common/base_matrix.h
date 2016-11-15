@@ -14,13 +14,25 @@ typedef std::shared_ptr<Scorer> ScorerPtr;
 
 class BaseMatrix {
   public:
-    virtual ~BaseMatrix() {}
+  BaseMatrix()
+  : rows_(0), cols_(0)
+  {}
 
-    virtual size_t Rows() const = 0;
-    virtual size_t Cols() const = 0;
-    virtual void Resize(size_t rows, size_t cols) = 0;
+  BaseMatrix(size_t rows, size_t cols)
+  : rows_(rows), cols_(cols)
+  {}
 
-    virtual std::string Debug() const = 0;
+  BaseMatrix(const BaseMatrix &m)
+  : rows_(m.rows_), cols_(m.cols_)
+  {}
+
+  virtual ~BaseMatrix() {}
+
+  virtual size_t Rows() const = 0;
+  virtual size_t Cols() const = 0;
+  virtual void Resize(size_t rows, size_t cols) = 0;
+
+  virtual std::string Debug() const = 0;
 
 protected:
   size_t rows_;
