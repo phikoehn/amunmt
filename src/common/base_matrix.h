@@ -21,4 +21,9 @@ class BaseMatrix {
     virtual void Resize(size_t rows, size_t cols) = 0;
 
     virtual std::string Debug() const = 0;
+
+protected:
+  size_t rows_;
+  size_t cols_;
+
 };

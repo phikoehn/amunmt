@@ -137,8 +137,6 @@ class TMatrix : public BaseMatrix {
     }
 
   private:
-    size_t rows_;
-    size_t cols_;
     VecType data_;
 };
 
