@@ -19,7 +19,7 @@ class BaseMatrix {
   : shape_({0, 0, 0})
   {}
 
-  BaseMatrix(int rows, int cols, int batchSize)
+  BaseMatrix(size_t rows, size_t cols, size_t batchSize)
   : shape_({rows, cols, batchSize})
   {}
 

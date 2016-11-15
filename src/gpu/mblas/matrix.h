@@ -28,12 +28,12 @@ class TMatrix : public BaseMatrix {
     TMatrix()
     {}
 
-    TMatrix(int rows, int cols)
+    TMatrix(size_t rows, size_t cols)
     : BaseMatrix(rows, cols, 1)
     , data_(shape_.elements())
     {}
 
-    TMatrix(int rows, int cols, value_type val)
+    TMatrix(size_t rows, size_t cols, value_type val)
     : BaseMatrix(rows, cols, 1)
     , data_(shape_.elements(), val)
     {}

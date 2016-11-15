@@ -35,7 +35,7 @@
 
 
   struct Shape {
-      int shape_[SHAPE_SIZE];
+    size_t shape_[SHAPE_SIZE];
 
       /**
        * @brief Constructs a default shape.
@@ -50,7 +50,7 @@
        *
        * @param i A list of integers representing the size of each dimension.
        */
-      Shape(std::initializer_list<int> il) {
+      Shape(std::initializer_list<size_t> il) {
        std::copy(il.begin(), il.end(), begin());
       }
 
@@ -64,7 +64,7 @@
        * @return a reference to the int representing the size of the <code>i</code>th dimension represented by this object
        */
       //__host__ __device__
-      int& operator[](int i) {
+      size_t& operator[](size_t i) {
         return shape_[i];
       }
 
@@ -74,7 +74,7 @@
        * @return the size of the <code>i</code>th dimension represented by this object
        */
       //__host__ __device__
-      const int& operator[](int i) const {
+      const size_t& operator[](size_t i) const {
         return shape_[i];
       }
 
@@ -96,22 +96,22 @@
        */
       size_t elements() const {
         size_t s = 1;
-        for(int i = 0; i < numDimensions(); ++i)
+        for(size_t i = 0; i < numDimensions(); ++i)
           s *= shape_[i];
         return s;
       }
 
       /** @brief Gets a pointer to an int that specifies the size of the first dimension represented by this object */
-      int* begin() { return shape_; }
+      size_t* begin() { return shape_; }
 
       /** @brief Gets a pointer to an int that specifies the size of the last dimension represented by this object */
-      int* end() { return shape_ + SHAPE_SIZE; }
+      size_t* end() { return shape_ + SHAPE_SIZE; }
 
       /** @brief Gets a const pointer to an int that specifies the size of the first dimension represented by this object */
-      const int* begin() const { return shape_; }
+      const size_t* begin() const { return shape_; }
 
       /** @brief Gets a const pointer to an int that specifies the size of the last dimension represented by this object */
-      const int* end() const { return shape_+ SHAPE_SIZE; }
+      const size_t* end() const { return shape_+ SHAPE_SIZE; }
 
       /**
        * @brief Tests this object for equality against another <code>Shape</code> object.
@@ -137,7 +137,7 @@
 
       size_t numSlices() const {
         size_t s = 1;
-        for(int i = 2; i < numDimensions(); ++i)
+        for(size_t i = 2; i < numDimensions(); ++i)
           s *= shape_[i];
         return s;
       }
