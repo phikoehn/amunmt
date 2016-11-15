@@ -130,5 +130,9 @@
       bool operator!=(const Shape& other) const {
         return !(*this == other);
       }
+
+      size_t matrixSize() const {
+        return shape_[0] * shape_[1];
+      }
   };
 

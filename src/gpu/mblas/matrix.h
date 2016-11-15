@@ -30,12 +30,12 @@ class TMatrix : public BaseMatrix {
 
     TMatrix(int rows, int cols)
     : BaseMatrix(rows, cols)
-    , data_(rows * cols)
+    , data_(shape_.matrixSize())
     {}
 
     TMatrix(int rows, int cols, value_type val)
     : BaseMatrix(rows, cols)
-    , data_(rows * cols, val)
+    , data_(shape_.matrixSize(), val)
     {}
 
     TMatrix(TMatrix&& m)
@@ -62,11 +62,11 @@ class TMatrix : public BaseMatrix {
     }
 
     void Resize(size_t rows, size_t cols) {
-      if (cols * rows > data_.size()) {
-        data_.resize(rows * cols);
+      Reshape(rows, cols);
+
+      if (shape_.matrixSize() > data_.size()) {
+        data_.resize(shape_.matrixSize());
       }
-      shape_[0] = rows;
-      shape_[1] = cols;
     }
 
     void Reshape(size_t rows, size_t cols) {
@@ -136,7 +136,7 @@ class TMatrix : public BaseMatrix {
 
     size_t size() const {
       // return data_.size();
-      return shape_[0] * shape_[1];
+      return shape_.matrixSize();
     }
 
   private:
