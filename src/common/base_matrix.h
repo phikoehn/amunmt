@@ -31,7 +31,7 @@ class BaseMatrix {
 
   virtual size_t Rows() const = 0;
   virtual size_t Cols() const = 0;
-  virtual void Resize(size_t rows, size_t cols) = 0;
+  virtual void Resize(size_t rows, size_t cols, size_t batchSize) = 0;
 
   void Reshape(size_t rows, size_t cols, size_t batchSize) {
     shape_[0] = rows;

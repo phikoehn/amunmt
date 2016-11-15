@@ -52,8 +52,8 @@ class TMatrix : public BaseMatrix {
       return shape_[1];
     }
 
-    void Resize(size_t rows, size_t cols) {
-      Reshape(rows, cols, 1);
+    void Resize(size_t rows, size_t cols, size_t batchSize) {
+      Reshape(rows, cols, batchSize);
 
       if (shape_.matrixSize() > data_.size()) {
         data_.resize(shape_.elements());

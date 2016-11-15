@@ -27,7 +27,7 @@ class Encoder {
 
           DeviceVector<size_t> dKnownWords(knownWords);
 
-          Row.Resize(words.size(), w_.E_.Cols());
+          Row.Resize(words.size(), w_.E_.Cols(), 1);
           mblas::Assemble(Row, w_.E_, dKnownWords);
           // mblas::Debug(Row);
         }
@@ -43,7 +43,7 @@ class Encoder {
         : gru_(model) {}
 
         void InitializeState(size_t batchSize = 1) {
-          State_.Resize(batchSize, gru_.GetStateLength());
+          State_.Resize(batchSize, gru_.GetStateLength(), 1);
           mblas::Fill(State_, 0.0f);
         }
 

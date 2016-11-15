@@ -56,8 +56,8 @@ class BlazeMatrix : public BaseMatrix, public blaze::CustomMatrix<T, blaze::unal
     	return BlazeBase::columns();
     }
 
-    virtual void Resize(size_t rows, size_t columns) {
-      Reshape(rows, columns, 1);
+    virtual void Resize(size_t rows, size_t columns, size_t batchSize) {
+      Reshape(rows, columns, batchSize);
       data_.resize(shape_.elements());
       BlazeBase temp(data_.data(), rows, columns);
       std::swap(temp, *(BlazeBase*)this);
@@ -77,7 +77,7 @@ class BlazeMatrix : public BaseMatrix, public blaze::CustomMatrix<T, blaze::unal
 
     template <class MT>
     BlazeMatrix<T, SO>& operator=(const MT& rhs) {
-      Resize(rhs.rows(), rhs.columns());
+      Resize(rhs.rows(), rhs.columns(), 1);
       BlazeBase temp(data_.data(), rhs.rows(), rhs.columns());
       temp = rhs;
       std::swap(temp, *(BlazeBase*)this);

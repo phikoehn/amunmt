@@ -60,7 +60,7 @@ class NpzConverter {
       auto it = model_.find(key);
       if(it != model_.end()) {
         NpyMatrixWrapper np(it->second);
-        matrix.Resize(np.size1(), np.size2());
+        matrix.Resize(np.size1(), np.size2(), 1);
         mblas::copy(np.data(), np.data() + np.size(), matrix.begin());
       }
       else {
@@ -74,7 +74,7 @@ class NpzConverter {
       auto it = model_.find(key);
       if(it != model_.end()) {
         NpyMatrixWrapper np(it->second);
-        matrix.Resize(np.size1(), np.size2());
+        matrix.Resize(np.size1(), np.size2(), 1);
         mblas::copy(np.data(), np.data() + np.size(), matrix.begin());
       }
       mblas::Transpose(matrix);

@@ -52,7 +52,7 @@ class Decoder {
                              const DeviceVector<int>& mapping) {
           using namespace mblas;
 
-          Temp2_.Resize(batchSize, SourceContext.Cols());
+          Temp2_.Resize(batchSize, SourceContext.Cols(), 1);
           Mean(Temp2_, SourceContext, mapping);
           Prod(State, Temp2_, w_.Wi_);
           BroadcastVec(Tanh(_1 + _2), State, w_.Bi_);
@@ -181,11 +181,11 @@ class Decoder {
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
 
           if(!filtered_) {
-            Probs.Resize(T1_.Rows(), w_.W4_.Cols());
+            Probs.Resize(T1_.Rows(), w_.W4_.Cols(), 1);
             Prod(Probs, T1_, w_.W4_);
             BroadcastVec(_1 + _2, Probs, w_.B4_);
           } else {
-            Probs.Resize(T1_.Rows(), FilteredW4_.Cols());
+            Probs.Resize(T1_.Rows(), FilteredW4_.Cols(), 1);
             Prod(Probs, T1_, FilteredW4_);
             BroadcastVec(_1 + _2, Probs, FilteredB4_);
           }
@@ -255,7 +255,7 @@ class Decoder {
 
     void EmptyEmbedding(mblas::Matrix& Embedding, size_t batchSize = 1) {
       Embedding.Clear();
-      Embedding.Resize(batchSize, embeddings_.GetCols());
+      Embedding.Resize(batchSize, embeddings_.GetCols(), 1);
       mblas::Fill(Embedding, 0);
     }
 
