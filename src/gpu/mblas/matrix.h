@@ -28,13 +28,8 @@ class TMatrix : public BaseMatrix {
     TMatrix()
     {}
 
-    TMatrix(size_t rows, size_t cols)
-    : BaseMatrix(rows, cols, 1)
-    , data_(shape_.elements())
-    {}
-
-    TMatrix(size_t rows, size_t cols, value_type val)
-    : BaseMatrix(rows, cols, 1)
+    TMatrix(size_t rows, size_t cols, size_t batchSize, value_type val)
+    : BaseMatrix(rows, cols, batchSize)
     , data_(shape_.elements(), val)
     {}
 
@@ -47,10 +42,6 @@ class TMatrix : public BaseMatrix {
 
     value_type operator()(size_t i, size_t j) const {
       return data_[i * shape_[1] + j];
-    }
-
-    void Set(size_t i, size_t j, float value)  {
-      data_[i * shape_[1] + j] = value;
     }
 
     size_t Rows() const {
@@ -81,12 +72,6 @@ class TMatrix : public BaseMatrix {
         strm << rowSum << " ";
       }
       return strm.str();
-    }
-
-    void Purge() {
-      Clear();
-      VecType temp;
-      data_.swap(temp);
     }
 
     void Clear() {
