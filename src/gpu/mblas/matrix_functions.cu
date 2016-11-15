@@ -5,6 +5,17 @@
 namespace GPU {
 namespace mblas {
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+    if (code != cudaSuccess) 
+    {
+          fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+          if (abort) exit(code);
+      }
+}
+
 #ifdef __APPLE__
 boost::thread_specific_ptr<cublasHandle_t> CublasHandler::handle_;
 #else
@@ -25,19 +36,38 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
   return Out;
 }
 
-Matrix& Mean(Matrix& Out, const Matrix& In) {
-  size_t m = In.Rows();
-  size_t n = In.Cols();
+__global__ void gMean(float* d_out, const float* d_in, const int* mapping,
+                      int batchNum, int senLen, int stateLength) {
+  int id = threadIdx.x + blockIdx.x * blockDim.x;
+  if (id < stateLength) {
+    float sum = 0.0f;
+    int counter = 0;
 
-  Out.Resize(1, n);
-  Fill(Out, 0.0f);
-  Matrix Ones(1, m, 1.f);
+    for (int i = 0; i < batchNum * senLen; ++i) {
+      sum += mapping[i] * d_in[i * stateLength + id];
+      counter += mapping[i];
 
-  float alpha = 1.0 / m;
-  float beta  = 0.0;
-  cublasSgemv(CublasHandler::GetHandle(), CUBLAS_OP_N, n, m, &alpha, In.data(), n,
-              Ones.data(), 1, &beta, Out.data(), 1);
-  return Out;
+      if ((i + 1) % senLen == 0) {
+        sum /= counter;
+        d_out[(i / senLen) * stateLength + id] = sum;
+        sum = 0.0f;
+        counter = 0;
+      }
+    }
+  }
+}
+
+void Mean(Matrix& Out, const Matrix& In, const DeviceVector<int>& mapping) {
+  int batchNum = Out.Rows();
+  int stateLength = Out.Cols();
+  int sentenceLength = In.Rows() / batchNum;
+
+  int nThreads = 512;
+  int nBlocks =  (stateLength / 512) + ((stateLength % 512 == 0) ?  0 : 1);
+
+  gMean<<<nBlocks, nThreads, 0, CudaStreamHandler::GetStream()>>>
+    (Out.data(), In.data(), thrust::raw_pointer_cast(mapping.data()),
+     batchNum, sentenceLength, stateLength);
 }
 
 Matrix& Transpose(Matrix& Out, const Matrix& In) {
@@ -73,6 +103,26 @@ Matrix& Copy(Matrix& Out, const Matrix& In) {
   Out.Resize(In.Rows(), In.Cols());
   mblas::copy(In.begin(), In.end(), Out.begin());
   return Out;
+}
+
+__global__ void gPasteRows(float* d_out, int outRows, int outCols, const float* d_in, int inRows, int inCols, int colNo, int sparse) {
+  int id = threadIdx.x + blockIdx.x * blockDim.x;
+  if (id < inRows * inCols) {
+    int inRow = id / inCols;
+    int inCol = id % inCols;
+    int outID = (outRows + sparse * inRow) * outCols + inCol + colNo;
+    d_out[outID] = d_in[id];
+  }
+}
+void PasteRows(Matrix& Out, const Matrix& In, const size_t rowNo, size_t colNo, size_t sparse) {
+  int nColumns = In.Cols();
+  int nRows = In.Rows();
+  int nThreads = 512;
+  int nBlocks =  (In.size() / 512) + ((In.size() % 512 == 0) ?  0 : 1);
+
+
+  gPasteRows<<<nBlocks, nThreads, 0, CudaStreamHandler::GetStream()>>>
+    (Out.data(), rowNo, Out.Cols(), In.data(), In.Rows(), In.Cols(), colNo, sparse);
 }
 
 Matrix& PasteRow(Matrix& Out,

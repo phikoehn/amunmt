@@ -8,15 +8,15 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/common/git_version.cpp.in"
 list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/common/git_version.cpp")
 
 
-add_library(cpumode OBJECT
-  cpu/mblas/matrix.cpp
-  cpu/mblas/phoenix_functions.cpp
-  cpu/dl4mt/decoder.cpp
-  cpu/dl4mt/encoder.cpp
-  cpu/dl4mt/gru.cpp
-  cpu/dl4mt/model.cpp
-  cpu/decoder/encoder_decoder.cpp
-)
+# add_library(cpumode OBJECT
+  # cpu/mblas/matrix.cpp
+  # cpu/mblas/phoenix_functions.cpp
+  # cpu/dl4mt/decoder.cpp
+  # cpu/dl4mt/encoder.cpp
+  # cpu/dl4mt/gru.cpp
+  # cpu/dl4mt/model.cpp
+  # cpu/decoder/encoder_decoder.cpp
+# )
 
 add_library(libcommon OBJECT
   ${CMAKE_CURRENT_BINARY_DIR}/common/git_version.cpp
@@ -44,7 +44,7 @@ set_source_files_properties( common/loader_factory.cpp
 cuda_add_executable(
   amun
   common/decoder_main.cpp
-  gpu/decoder/ape_penalty.cu
+  # gpu/decoder/ape_penalty.cu
   gpu/decoder/encoder_decoder.cu
   gpu/dl4mt/encoder.cu
   gpu/dl4mt/gru.cu
@@ -60,8 +60,8 @@ cuda_add_executable(
 )
 
 cuda_add_library(amunmt SHARED
-  #python/amunmt.cpp
-  gpu/decoder/ape_penalty.cu
+  # python/amunmt.cpp
+  # gpu/decoder/ape_penalty.cu
   gpu/decoder/encoder_decoder.cu
   gpu/mblas/matrix_functions.cu
   gpu/mblas/nth_element.cu

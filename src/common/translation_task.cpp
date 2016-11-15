@@ -11,6 +11,5 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   }
 
   assert(sentences->size());
-  const Sentence *sentence = sentences->at(0);
-  return search->Decode(*sentence);
+  return search->Decode(*sentences);
 }

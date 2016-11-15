@@ -3,6 +3,8 @@
 #include "gpu/mblas/matrix_functions.h"
 #include "model.h"
 #include "gru.h"
+#include "common/sentence.h"
+#include "gpu/types-gpu.h"
 
 namespace GPU {
 
@@ -15,12 +17,19 @@ class Encoder {
         : w_(model)
         {}
 
-        void Lookup(mblas::Matrix& Row, size_t i) {
-          using namespace mblas;
-          if(i < w_.E_.Rows())
-            CopyRow(Row, w_.E_, i);
-          else
-            CopyRow(Row, w_.E_, 1); // UNK
+        void Lookup(mblas::Matrix& Row, const Words& words) {
+          thrust::host_vector<size_t> knownWords(words.size(), 1);
+          for (size_t i = 0; i < words.size(); ++i) {
+            if (words[i] < w_.E_.Rows()) {
+              knownWords[i] = words[i];
+            }
+          }
+
+          DeviceVector<size_t> dKnownWords(knownWords);
+
+          Row.Resize(words.size(), w_.E_.Cols());
+          mblas::Assemble(Row, w_.E_, dKnownWords);
+          // mblas::Debug(Row);
         }
 
       private:
@@ -45,17 +54,17 @@ class Encoder {
         }
 
         template <class It>
-        void GetContext(It it, It end, mblas::Matrix& Context, bool invert) {
-          InitializeState();
+        void GetContext(It it, It end, mblas::Matrix& Context, size_t batchSize, bool invert) {
+          InitializeState(batchSize);
 
           size_t n = std::distance(it, end);
           size_t i = 0;
           while(it != end) {
             GetNextState(State_, State_, *it++);
             if(invert)
-              mblas::PasteRow(Context, State_, n - i - 1, gru_.GetStateLength());
+              mblas::PasteRows(Context, State_, (n - i - 1) * batchSize, gru_.GetStateLength(), n);
             else
-              mblas::PasteRow(Context, State_, i, 0);
+              mblas::PasteRows(Context, State_, i * batchSize, 0, n);
             ++i;
           }
         }
@@ -74,8 +83,8 @@ class Encoder {
   public:
     Encoder(const Weights& model);
 
-    void GetContext(const std::vector<size_t>& words,
-                    mblas::Matrix& Context);
+    void GetContext(const Sentences& words, size_t tab, mblas::Matrix& Context,
+                    DeviceVector<int>& mapping);
 
   private:
     Embeddings<Weights::EncEmbeddings> embeddings_;

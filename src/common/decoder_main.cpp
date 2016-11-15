@@ -55,8 +55,7 @@ int main(int argc, char* argv[]) {
     Sentences *sentences = new Sentences();
 
     while(std::getline(God::GetInputStream(), in)) {
-      Sentence *sentence = new Sentence(taskCounter, in);
-      sentences->push_back(sentence);
+      sentences->emplace_back(taskCounter, in);
 
       if (sentences->size() >= maxBatchSize) {
         results.emplace_back(
@@ -65,7 +64,7 @@ int main(int argc, char* argv[]) {
           )
         );
 
-        sentences = new Sentences();;
+        sentences = new Sentences();
 
         taskCounter++;
       }

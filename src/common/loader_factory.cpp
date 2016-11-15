@@ -1,12 +1,13 @@
-#include "loader_factory.h"
+#include "common/loader_factory.h"
 
 #include "god.h"
 #include "scorer.h"
 //#include "cpu/decoder/encoder_decoder_loader.h"
+#include "common/logging.h"
 
 #ifdef CUDA
 #include "gpu/decoder/encoder_decoder.h"
-#include "gpu/decoder/ape_penalty.h"
+// #include "gpu/decoder/ape_penalty.h"
 
 #ifdef KENLM
 #include "gpu/decoder/language_model.h"
@@ -30,10 +31,10 @@ LoaderPtr LoaderFactory::Create(
   }
 
 
-	loader = CreateCPU(name, config);
-	if (loader) {
-		return LoaderPtr(loader);
-	}
+	// loader = CreateCPU(name, config);
+	// if (loader) {
+		// return LoaderPtr(loader);
+	// }
 
 	std::string type = config["type"].as<std::string>();
 	UTIL_THROW2("Unknown scorer in config file: " << type);
@@ -51,9 +52,9 @@ Loader *LoaderFactory::CreateGPU(
   IF_MATCH_RETURN(type, "nematus", GPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(type, "NEMATUS", GPU::EncoderDecoderLoader);
 
-  IF_MATCH_RETURN(type, "Ape", GPU::ApePenaltyLoader);
-  IF_MATCH_RETURN(type, "ape", GPU::ApePenaltyLoader);
-  IF_MATCH_RETURN(type, "APE", GPU::ApePenaltyLoader);
+  // IF_MATCH_RETURN(type, "Ape", GPU::ApePenaltyLoader);
+  // IF_MATCH_RETURN(type, "ape", GPU::ApePenaltyLoader);
+  // IF_MATCH_RETURN(type, "APE", GPU::ApePenaltyLoader);
 
 #ifdef KENLM
   IF_MATCH_RETURN(type, "KenLM", GPU::KenLMLoader)
@@ -66,11 +67,11 @@ Loader *LoaderFactory::CreateGPU(
 #endif
 
 
-Loader *LoaderFactory::CreateCPU(const std::string& name,
-						const YAML::Node& config) {
-  UTIL_THROW_IF2(!config["type"],
-				 "Missing scorer type in config file");
-  std::string type = config["type"].as<std::string>();
+// Loader *LoaderFactory::CreateCPU(const std::string& name,
+						// const YAML::Node& config) {
+  // UTIL_THROW_IF2(!config["type"],
+				 // "Missing scorer type in config file");
+  // std::string type = config["type"].as<std::string>();
 
   /*
   IF_MATCH_RETURN(type, "Nematus", CPU::EncoderDecoderLoader);
@@ -78,5 +79,5 @@ Loader *LoaderFactory::CreateCPU(const std::string& name,
   IF_MATCH_RETURN(type, "NEMATUS", CPU::EncoderDecoderLoader);
   */
 
-  return NULL;
-}
+  // return NULL;
+// }
