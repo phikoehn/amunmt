@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "common/types.h"
+#include "common/shape.h"
 
 class Hypothesis;
 typedef std::shared_ptr<Hypothesis> HypothesisPtr;
@@ -15,15 +16,15 @@ typedef std::shared_ptr<Scorer> ScorerPtr;
 class BaseMatrix {
   public:
   BaseMatrix()
-  : rows_(0), cols_(0)
+  : shape_({0, 0})
   {}
 
-  BaseMatrix(size_t rows, size_t cols)
-  : rows_(rows), cols_(cols)
+  BaseMatrix(int rows, int cols)
+  : shape_({rows, cols})
   {}
 
   BaseMatrix(const BaseMatrix &m)
-  : rows_(m.rows_), cols_(m.cols_)
+  : shape_(m.shape_)
   {}
 
   virtual ~BaseMatrix() {}
@@ -35,7 +36,6 @@ class BaseMatrix {
   virtual std::string Debug() const = 0;
 
 protected:
-  size_t rows_;
-  size_t cols_;
+  Shape shape_;
 
 };

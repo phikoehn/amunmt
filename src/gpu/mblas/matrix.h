@@ -28,14 +28,14 @@ class TMatrix : public BaseMatrix {
     TMatrix()
     {}
 
-    TMatrix(size_t rows, size_t cols)
+    TMatrix(int rows, int cols)
     : BaseMatrix(rows, cols)
-    , data_(rows_ * cols_)
+    , data_(rows * cols)
     {}
 
-    TMatrix(size_t rows, size_t cols, value_type val)
+    TMatrix(int rows, int cols, value_type val)
     : BaseMatrix(rows, cols)
-    , data_(rows_ * cols_, val)
+    , data_(rows * cols, val)
     {}
 
     TMatrix(TMatrix&& m)
@@ -46,32 +46,32 @@ class TMatrix : public BaseMatrix {
     TMatrix(const TMatrix& m) = delete;
 
     value_type operator()(size_t i, size_t j) const {
-      return data_[i * cols_ + j];
+      return data_[i * shape_[1] + j];
     }
 
     void Set(size_t i, size_t j, float value)  {
-      data_[i * cols_ + j] = value;
+      data_[i * shape_[1] + j] = value;
     }
 
     size_t Rows() const {
-      return rows_;
+      return shape_[0];
     }
 
     size_t Cols() const {
-      return cols_;
+      return shape_[1];
     }
 
     void Resize(size_t rows, size_t cols) {
       if (cols * rows > data_.size()) {
         data_.resize(rows * cols);
       }
-      rows_ = rows;
-      cols_ = cols;
+      shape_[0] = rows;
+      shape_[1] = cols;
     }
 
     void Reshape(size_t rows, size_t cols) {
-      rows_ = rows;
-      cols_ = cols;
+      shape_[0] = rows;
+      shape_[1] = cols;
     }
 
     virtual std::string Debug() const
@@ -96,8 +96,8 @@ class TMatrix : public BaseMatrix {
 
     void Clear() {
       data_.clear();
-      rows_ = 0;
-      cols_ = 0;
+      shape_[0] = 0;
+      shape_[1] = 0;
     }
 
     VecType& GetVec() {
@@ -136,7 +136,7 @@ class TMatrix : public BaseMatrix {
 
     size_t size() const {
       // return data_.size();
-      return cols_ * rows_;
+      return shape_[0] * shape_[1];
     }
 
   private:

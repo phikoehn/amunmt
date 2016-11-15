@@ -63,7 +63,7 @@
        *
        * @return a reference to the int representing the size of the <code>i</code>th dimension represented by this object
        */
-      __host__ __device__
+      //__host__ __device__
       int& operator[](int i) {
         return shape_[i];
       }
@@ -73,7 +73,7 @@
        *
        * @return the size of the <code>i</code>th dimension represented by this object
        */
-      __host__ __device__
+      //__host__ __device__
       const int& operator[](int i) const {
         return shape_[i];
       }
