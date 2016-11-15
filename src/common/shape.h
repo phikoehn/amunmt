@@ -134,5 +134,12 @@
       size_t matrixSize() const {
         return shape_[0] * shape_[1];
       }
-  };
+
+      size_t numSlices() const {
+        size_t s = 1;
+        for(int i = 2; i < size(); ++i)
+          s *= shape_[i];
+        return s;
+      }
+};
 

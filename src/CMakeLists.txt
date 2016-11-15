@@ -54,7 +54,7 @@ cuda_add_executable(
   common/loader_factory.cpp
   common/translation_task.cpp
   $<TARGET_OBJECTS:libcommon>
-  $<TARGET_OBJECTS:cpumode>
+  #$<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libyaml-cpp>
   $<TARGET_OBJECTS:libcnpy>
 )
@@ -71,7 +71,7 @@ cuda_add_library(amunmt SHARED
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcommon>
   $<TARGET_OBJECTS:libcnpy>
-  $<TARGET_OBJECTS:cpumode>
+  #$<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libyaml-cpp>
 )
 
@@ -82,7 +82,7 @@ add_executable(
   common/decoder_main.cpp
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcnpy>
-  $<TARGET_OBJECTS:cpumode>
+  #$<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libcommon>
   $<TARGET_OBJECTS:libyaml-cpp>
 )
@@ -91,7 +91,7 @@ add_library(amunmt SHARED
   python/amunmt.cpp
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcnpy>
-  $<TARGET_OBJECTS:cpumode>
+  #$<TARGET_OBJECTS:cpumode>
   $<TARGET_OBJECTS:libcommon>
   $<TARGET_OBJECTS:libyaml-cpp>
 )

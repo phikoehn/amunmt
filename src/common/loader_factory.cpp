@@ -1,7 +1,8 @@
 #include "loader_factory.h"
 
+#include "god.h"
 #include "scorer.h"
-#include "cpu/decoder/encoder_decoder_loader.h"
+//#include "cpu/decoder/encoder_decoder_loader.h"
 
 #ifdef CUDA
 #include "gpu/decoder/encoder_decoder.h"
@@ -71,9 +72,11 @@ Loader *LoaderFactory::CreateCPU(const std::string& name,
 				 "Missing scorer type in config file");
   std::string type = config["type"].as<std::string>();
 
+  /*
   IF_MATCH_RETURN(type, "Nematus", CPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(type, "nematus", CPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(type, "NEMATUS", CPU::EncoderDecoderLoader);
+  */
 
   return NULL;
 }
