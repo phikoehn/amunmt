@@ -57,9 +57,10 @@ class BlazeMatrix : public BaseMatrix, public blaze::CustomMatrix<T, blaze::unal
     }
 
     virtual void Resize(size_t rows, size_t columns) {
-       data_.resize(rows * columns);
-       BlazeBase temp(data_.data(), rows, columns);
-       std::swap(temp, *(BlazeBase*)this);
+      Reshape(rows, columns, 1);
+      data_.resize(shape_.elements());
+      BlazeBase temp(data_.data(), rows, columns);
+      std::swap(temp, *(BlazeBase*)this);
     }
 
     virtual std::string Debug() const

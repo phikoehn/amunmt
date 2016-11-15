@@ -122,7 +122,7 @@ class Decoder {
 
           size_t rows1 = SourceContext.Rows();
           size_t rows2 = HiddenState.Rows();
-          A_.Reshape(rows2, rows1); // due to broadcasting above
+          A_.Reshape(rows2, rows1, 1); // due to broadcasting above
           Element(_1 + WC_, A_);
 
           mblas::Softmax(A_);

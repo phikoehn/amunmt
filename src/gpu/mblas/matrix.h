@@ -62,16 +62,11 @@ class TMatrix : public BaseMatrix {
     }
 
     void Resize(size_t rows, size_t cols) {
-      Reshape(rows, cols);
+      Reshape(rows, cols, 1);
 
       if (shape_.matrixSize() > data_.size()) {
         data_.resize(shape_.elements());
       }
-    }
-
-    void Reshape(size_t rows, size_t cols) {
-      shape_[0] = rows;
-      shape_[1] = cols;
     }
 
     virtual std::string Debug() const
