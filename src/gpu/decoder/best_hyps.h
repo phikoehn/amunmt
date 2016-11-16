@@ -56,9 +56,10 @@ class BestHyps {
           mblas::Matrix& attention = encdec->GetAttention();
           size_t attLength = attention.Cols();
 
-          alignments.emplace_back(new SoftAlignment(
-                attention.begin() + hypIndex * attLength,
-                attention.begin() + (hypIndex + 1) * attLength));
+          SoftAlignment *softAlignment
+            = new SoftAlignment(attention.data() + hypIndex * attLength,
+                                attention.data() + (hypIndex + 1) * attLength);
+          alignments.emplace_back(softAlignment);
         } else {
           UTIL_THROW2("Return Alignment is allowed only with Nematus scorer.");
         }

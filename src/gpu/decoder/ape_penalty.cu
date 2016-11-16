@@ -35,7 +35,7 @@ void ApePenalty::Score(const State& in, State& out) {
   size_t cols = Probs_.Cols();
   costs_.resize(cols, -1.0);
   for(size_t i = 0; i < Probs_.Rows(); ++i) {
-    algo::copy(costs_.begin(), costs_.begin() + cols, Probs_.begin() + i * cols);
+    algo::copy(costs_.begin(), costs_.begin() + cols, Probs_.data() + i * cols);
   }
 }
 

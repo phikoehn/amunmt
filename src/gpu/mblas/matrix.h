@@ -22,8 +22,6 @@ template <class VecType>
 class TMatrix : public BaseMatrix {
   public:
     typedef typename VecType::value_type value_type;
-    typedef typename VecType::iterator iterator;
-    typedef typename VecType::const_iterator const_iterator;
 
     TMatrix()
     //:data2_(NULL)
@@ -107,18 +105,7 @@ class TMatrix : public BaseMatrix {
       return thrust::raw_pointer_cast(data_.data());
     }
 
-    iterator begin() {
-      return data_.begin();
-    }
-
-    const_iterator end() const {
-      return data_.begin() + size();
-
-      // return data_.end();
-    }
-
     size_t size() const {
-      // return data_.size();
       return shape_.elements();
     }
 
