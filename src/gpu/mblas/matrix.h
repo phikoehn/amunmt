@@ -26,7 +26,7 @@ class TMatrix : public BaseMatrix {
     typedef typename VecType::const_iterator const_iterator;
 
     TMatrix()
-    :data2_(NULL)
+    //:data2_(NULL)
     {}
 
     // always init to zero
@@ -34,26 +34,28 @@ class TMatrix : public BaseMatrix {
     : BaseMatrix(rows, cols, batchSize)
     , data_(shape_.elements(), 0.0f)
     {
-      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
-      HANDLE_ERROR( cudaMemset(data2_, 0, shape_.elements() * sizeof(float)) );
+      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
+      //HANDLE_ERROR( cudaMemset(data2_, 0, shape_.elements() * sizeof(float)) );
     }
 
     TMatrix(TMatrix&& m)
     : BaseMatrix(m)
     , data_(std::move(m.data_))
     {
+      /*
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
       HANDLE_ERROR( cudaMemcpy(
           data2_,
           m.data2_,
           shape_.elements() * sizeof(float),
           cudaMemcpyDeviceToDevice) );
+      */
     }
 
     TMatrix(const TMatrix& m) = delete;
 
     ~TMatrix() {
-      cudaFree(data2_);
+      //cudaFree(data2_);
     }
 
     value_type operator()(size_t i, size_t j) const {
@@ -76,8 +78,8 @@ class TMatrix : public BaseMatrix {
       if (shape_.elements() > oldSize) {
         data_.resize(shape_.elements());
 
-        cudaFree(data2_);
-        HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
+        //cudaFree(data2_);
+        //HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
       }
     }
 
@@ -131,7 +133,7 @@ class TMatrix : public BaseMatrix {
 
   private:
     VecType data_;
-    float *data2_;
+    //float *data2_;
 
 };
 
