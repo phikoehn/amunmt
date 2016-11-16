@@ -141,5 +141,13 @@
           s *= shape_[i];
         return s;
       }
+
+      void swap(Shape &other) {
+        for(size_t i = 0; i < numDimensions(); ++i) {
+          size_t temp = shape_[i];
+          shape_[i] = other.shape_[i];
+          other.shape_[i] = temp;
+        }
+      }
 };
 

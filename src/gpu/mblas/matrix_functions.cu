@@ -24,13 +24,7 @@ thread_local CudaStreamHandler* CudaStreamHandler::instance_ = nullptr;;
 #endif
 
 Matrix& Swap(Matrix& Out, Matrix& In) {
-  size_t iRows = In.Rows();
-  size_t iCols = In.Cols();
-  size_t oRows = Out.Rows();
-  size_t oCols = Out.Cols();
-
-  Out.Reshape(iRows, iCols, 1);
-  In.Reshape(oRows, oCols, 1);
+  Out.shape().swap(In.shape());
 
   In.GetVec().swap(Out.GetVec());
   return Out;

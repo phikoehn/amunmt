@@ -41,6 +41,10 @@ class BaseMatrix {
 
   virtual std::string Debug() const = 0;
 
+  Shape &shape() {
+    return shape_;
+  }
+
 protected:
   Shape shape_;
 

@@ -84,10 +84,6 @@ class TMatrix : public BaseMatrix {
       return data_;
     }
 
-    const VecType& GetVec() const {
-      return data_;
-    }
-
     value_type* data() {
       return thrust::raw_pointer_cast(data_.data());
     }
@@ -98,11 +94,6 @@ class TMatrix : public BaseMatrix {
 
     iterator begin() {
       return data_.begin();
-    }
-
-    iterator end() {
-      return data_.begin() + size();
-      // return data_.end();
     }
 
     const_iterator begin() const{
@@ -121,6 +112,7 @@ class TMatrix : public BaseMatrix {
 
   private:
     VecType data_;
+
 };
 
 typedef TMatrix<DeviceVector<float>> Matrix;
