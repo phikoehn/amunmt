@@ -105,10 +105,12 @@ class TMatrix : public BaseMatrix {
 
     value_type* data() {
       return thrust::raw_pointer_cast(data_.data());
+      //return data2_;
     }
 
     const value_type* data() const {
       return thrust::raw_pointer_cast(data_.data());
+      //return data2_;
     }
 
     size_t size() const {
@@ -117,7 +119,13 @@ class TMatrix : public BaseMatrix {
 
     void swap(TMatrix &other) {
       shape_.swap(other.shape_);
+
       data_.swap(other.data_);
+      /*
+      value_type *temp = data2_;
+      data2_ = other.data2_;
+      other.data2_ = temp;
+      */
     }
 
     void copy(const TMatrix &other, size_t outOffset = 0) {
