@@ -25,7 +25,9 @@ class TMatrix : public BaseMatrix {
 
     TMatrix()
     //:data2_(NULL)
-    {}
+    {
+        //std::cerr << "TMatrix(1)=" << data2_ << std::endl;
+    }
 
     // always init to zero
     TMatrix(size_t rows, size_t cols, size_t batchSize)
@@ -35,6 +37,7 @@ class TMatrix : public BaseMatrix {
     {
       //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       HANDLE_ERROR( cudaMemset(data(), 0, shape_.elements() * sizeof(value_type)) );
+      //std::cerr << "TMatrix(2)=" << data2_ << std::endl;
     }
 
     TMatrix(TMatrix&& m)
@@ -42,20 +45,20 @@ class TMatrix : public BaseMatrix {
     //, data_(std::move(m.data_))
     , data_(shape_.elements())
     {
-      /*
-      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
-      */
+      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       HANDLE_ERROR( cudaMemcpy(
           data(),
           m.data(),
           shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
+      //std::cerr << "TMatrix(3)=" << data2_ << std::endl;
     }
 
     TMatrix(const TMatrix& m) = delete;
 
     ~TMatrix() {
-      //cudaFree(data2_);
+      //std::cerr << "destrucor=" << data2_ << std::endl;
+      //HANDLE_ERROR( cudaFree(data2_) );
     }
 
     value_type operator()(size_t i, size_t j) const {
@@ -82,8 +85,18 @@ class TMatrix : public BaseMatrix {
       if (shape_.elements() > oldSize) {
         data_.resize(shape_.elements());
 
-        //cudaFree(data2_);
-        //HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(value_type)) );
+        /*
+        value_type *temp;
+        HANDLE_ERROR( cudaMalloc(&temp, shape_.elements() * sizeof(value_type)) );
+        HANDLE_ERROR( cudaMemcpy(temp, data2_, oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice) );
+        std::cerr << "Resize="
+        		<< data2_ << "(" << oldSize << ") "
+        		<< temp << "(" << shape_.elements() << ")"
+        		<< std::endl;
+
+        HANDLE_ERROR( cudaFree(data2_) );
+        data2_ = temp;
+        */
       }
     }
 
