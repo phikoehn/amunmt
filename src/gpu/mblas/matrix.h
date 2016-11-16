@@ -97,10 +97,6 @@ class TMatrix : public BaseMatrix {
       return strm.str();
     }
 
-    VecType& GetVec() {
-      return data_;
-    }
-
     value_type* data() {
       return thrust::raw_pointer_cast(data_.data());
     }
@@ -119,12 +115,18 @@ class TMatrix : public BaseMatrix {
 
     const_iterator end() const {
       return data_.begin() + size();
+
       // return data_.end();
     }
 
     size_t size() const {
       // return data_.size();
       return shape_.matrixSize();
+    }
+
+    void swap(TMatrix &other) {
+      shape_.swap(other.shape_);
+      data_.swap(other.data_);
     }
 
   private:

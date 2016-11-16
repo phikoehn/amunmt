@@ -24,9 +24,7 @@ thread_local CudaStreamHandler* CudaStreamHandler::instance_ = nullptr;;
 #endif
 
 Matrix& Swap(Matrix& Out, Matrix& In) {
-  Out.shape().swap(In.shape());
-
-  In.GetVec().swap(Out.GetVec());
+  Out.swap(In);
   return Out;
 }
 
