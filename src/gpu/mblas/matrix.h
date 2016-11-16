@@ -29,18 +29,25 @@ class TMatrix : public BaseMatrix {
     :data2_(NULL)
     {}
 
-    TMatrix(size_t rows, size_t cols, size_t batchSize, value_type val)
+    // always init to zero
+    TMatrix(size_t rows, size_t cols, size_t batchSize)
     : BaseMatrix(rows, cols, batchSize)
-    , data_(shape_.elements(), val)
+    , data_(shape_.elements(), 0.0f)
     {
-      HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
+      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
+      HANDLE_ERROR( cudaMemset(data2_, 0, shape_.elements() * sizeof(float)) );
     }
 
     TMatrix(TMatrix&& m)
     : BaseMatrix(m)
     , data_(std::move(m.data_))
     {
-      HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
+      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
+      HANDLE_ERROR( cudaMemcpy(
+          data2_,
+          m.data2_,
+          shape_.elements() * sizeof(float),
+          cudaMemcpyDeviceToDevice) );
     }
 
     TMatrix(const TMatrix& m) = delete;
