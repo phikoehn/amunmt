@@ -254,7 +254,6 @@ class Decoder {
     }
 
     void EmptyEmbedding(mblas::Matrix& Embedding, size_t batchSize = 1) {
-      Embedding.Clear();
       Embedding.Resize(batchSize, embeddings_.GetCols(), 1);
       mblas::Fill(Embedding, 0);
     }

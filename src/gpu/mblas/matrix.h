@@ -26,19 +26,28 @@ class TMatrix : public BaseMatrix {
     typedef typename VecType::const_iterator const_iterator;
 
     TMatrix()
+    :data2_(NULL)
     {}
 
     TMatrix(size_t rows, size_t cols, size_t batchSize, value_type val)
     : BaseMatrix(rows, cols, batchSize)
     , data_(shape_.elements(), val)
-    {}
+    {
+      HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
+    }
 
     TMatrix(TMatrix&& m)
     : BaseMatrix(m)
     , data_(std::move(m.data_))
-    {}
+    {
+      HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
+    }
 
     TMatrix(const TMatrix& m) = delete;
+
+    ~TMatrix() {
+      cudaFree(data2_);
+    }
 
     value_type operator()(size_t i, size_t j) const {
       return data_[i * shape_[1] + j];
@@ -53,16 +62,22 @@ class TMatrix : public BaseMatrix {
     }
 
     void Resize(size_t rows, size_t cols, size_t batchSize) {
+      size_t oldSize = shape_.elements();
+
       Reshape(rows, cols, batchSize);
 
-      if (shape_.matrixSize() > data_.size()) {
+      if (shape_.elements() > oldSize) {
         data_.resize(shape_.elements());
+
+        cudaFree(data2_);
+        HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
       }
     }
 
     virtual std::string Debug() const
     {
       std::stringstream strm;
+      /*
       strm << Rows() << "x" << Cols() << ":";
       for (size_t row = 0; row < Rows(); ++row) {
         float rowSum = 0;
@@ -71,13 +86,8 @@ class TMatrix : public BaseMatrix {
         }
         strm << rowSum << " ";
       }
+      */
       return strm.str();
-    }
-
-    void Clear() {
-      data_.clear();
-      shape_[0] = 0;
-      shape_[1] = 0;
     }
 
     VecType& GetVec() {
@@ -112,6 +122,7 @@ class TMatrix : public BaseMatrix {
 
   private:
     VecType data_;
+    float *data2_;
 
 };
 

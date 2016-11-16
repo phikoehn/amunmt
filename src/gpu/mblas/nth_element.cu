@@ -1,17 +1,9 @@
 #include "gpu/mblas/nth_element.h"
+#include "gpu/types-gpu.h"
 #include <iostream>
 
 
 namespace GPU {
-
-static void HandleError(cudaError_t err, const char *file, int line ) {
-  if (err != cudaSuccess) {
-    std::cerr << "ERROR: " << cudaGetErrorString(err) << " in " << file << " at line " << line << std::endl;
-    exit( EXIT_FAILURE );
-  }
-}
-
-#define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
 __global__ void gMaxElement(float* d_out, int* d_ind, float* d_in, int in_size) {
   extern __shared__ float sdata[];

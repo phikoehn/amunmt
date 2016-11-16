@@ -43,7 +43,7 @@
        * This default shape has four dimensions.
        * The size of each dimension is 1.
        */
-      Shape() : shape_{1, 1, 1} { }
+      Shape() : shape_{0, 0, 0} { }
 
       /**
        * @brief Constructs a shape.
