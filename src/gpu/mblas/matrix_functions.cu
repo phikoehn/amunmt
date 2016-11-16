@@ -87,7 +87,8 @@ Matrix& Transpose(Matrix& Out) {
 Matrix& Concat(Matrix& Out, const Matrix& In) {
   size_t oldSize = Out.size();
   Out.Resize(Out.Rows() + In.Rows(), Out.Cols(), 1);
-  mblas::copy(In.begin(), In.end(), Out.begin() + oldSize);
+
+  Out.copy(In, oldSize);
   return Out;
 }
 
@@ -122,7 +123,8 @@ Matrix& PasteRow(Matrix& Out,
                  const Matrix& In,
                  const size_t r, const size_t c) {
   size_t start = r * Out.Cols() + c;
-  mblas::copy(In.begin(), In.end(), Out.begin() + start);
+  Out.copy(In, start);
+
   return Out;
 }
 
@@ -132,8 +134,9 @@ Matrix& CopyRow(Matrix& Out,
   size_t length = In.Cols() - c;
   Out.Resize(1, length, 1);
   size_t start = r * In.Cols() + c;
-  size_t end   = start + length;
-  mblas::copy(In.begin() + start, In.begin() + end, Out.begin());
+
+  Out.copy(In, start, length);
+
   return Out;
 }
 

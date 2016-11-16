@@ -53,7 +53,7 @@ class BestHyps {
       std::vector<SoftAlignmentPtr> alignments;
       for (auto& scorer : scorers) {
         if (GPU::EncoderDecoder* encdec = dynamic_cast<GPU::EncoderDecoder*>(scorer.get())) {
-          auto& attention = encdec->GetAttention();
+          mblas::Matrix& attention = encdec->GetAttention();
           size_t attLength = attention.Cols();
 
           alignments.emplace_back(new SoftAlignment(

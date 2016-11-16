@@ -111,10 +111,6 @@ class TMatrix : public BaseMatrix {
       return data_.begin();
     }
 
-    const_iterator begin() const{
-      return data_.begin();
-    }
-
     const_iterator end() const {
       return data_.begin() + size();
 
@@ -131,16 +127,20 @@ class TMatrix : public BaseMatrix {
       data_.swap(other.data_);
     }
 
-    void copy(const TMatrix &other, size_t outOffset) {
+    void copy(const TMatrix &other, size_t outOffset = 0) {
       HANDLE_ERROR( cudaMemcpy(
           data() + outOffset,
           other.data(),
-          shape_.elements() * sizeof(float),
+          other.shape_.elements() * sizeof(float),
           cudaMemcpyDeviceToDevice) );
     }
 
-    void copy(const TMatrix &other) {
-      copy(other, 0);
+    void copy(const TMatrix &other, size_t inStart, size_t inLength) {
+      HANDLE_ERROR( cudaMemcpy(
+          data(),
+          other.data() + inStart,
+          inLength * sizeof(float),
+          cudaMemcpyDeviceToDevice) );
     }
 
   private:
