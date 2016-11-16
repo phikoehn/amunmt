@@ -32,8 +32,8 @@ class TMatrix : public BaseMatrix {
     : BaseMatrix(rows, cols, batchSize)
     , data_(shape_.elements(), 0.0f)
     {
-      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
-      //HANDLE_ERROR( cudaMemset(data2_, 0, shape_.elements() * sizeof(float)) );
+      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
+      //HANDLE_ERROR( cudaMemset(data2_, 0, shape_.elements() * sizeof(value_type)) );
     }
 
     TMatrix(TMatrix&& m)
@@ -41,11 +41,11 @@ class TMatrix : public BaseMatrix {
     , data_(std::move(m.data_))
     {
       /*
-      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(float)) );
+      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       HANDLE_ERROR( cudaMemcpy(
           data2_,
           m.data2_,
-          shape_.elements() * sizeof(float),
+          shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
       */
     }
@@ -57,7 +57,11 @@ class TMatrix : public BaseMatrix {
     }
 
     value_type operator()(size_t i, size_t j) const {
-      return data_[i * shape_[1] + j];
+      value_type ret;
+      const value_type &src = data()[i * shape_[1] + j];
+      HANDLE_ERROR( cudaMemcpy(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost) );
+
+      return ret;
     }
 
     size_t Rows() const {
@@ -77,7 +81,7 @@ class TMatrix : public BaseMatrix {
         data_.resize(shape_.elements());
 
         //cudaFree(data2_);
-        //HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(float)) );
+        //HANDLE_ERROR( cudaMalloc((void**)&data2_, shape_.elements() * sizeof(value_type)) );
       }
     }
 
@@ -87,7 +91,7 @@ class TMatrix : public BaseMatrix {
       /*
       strm << Rows() << "x" << Cols() << ":";
       for (size_t row = 0; row < Rows(); ++row) {
-        float rowSum = 0;
+        value_type rowSum = 0;
         for (size_t col = 0; col < Cols(); ++col) {
           rowSum += (*this)(row, col);
         }
@@ -118,7 +122,7 @@ class TMatrix : public BaseMatrix {
       HANDLE_ERROR( cudaMemcpy(
           data() + outOffset,
           other.data(),
-          other.shape_.elements() * sizeof(float),
+          other.shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
     }
 
@@ -126,13 +130,13 @@ class TMatrix : public BaseMatrix {
       HANDLE_ERROR( cudaMemcpy(
           data(),
           other.data() + inStart,
-          inLength * sizeof(float),
+          inLength * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
     }
 
   private:
     VecType data_;
-    //float *data2_;
+    //value_type *data2_;
 
 };
 
