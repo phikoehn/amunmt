@@ -123,12 +123,24 @@ class TMatrix : public BaseMatrix {
 
     size_t size() const {
       // return data_.size();
-      return shape_.matrixSize();
+      return shape_.elements();
     }
 
     void swap(TMatrix &other) {
       shape_.swap(other.shape_);
       data_.swap(other.data_);
+    }
+
+    void copy(const TMatrix &other, size_t outOffset) {
+      HANDLE_ERROR( cudaMemcpy(
+          data() + outOffset,
+          other.data(),
+          shape_.elements() * sizeof(float),
+          cudaMemcpyDeviceToDevice) );
+    }
+
+    void copy(const TMatrix &other) {
+      copy(other, 0);
     }
 
   private:

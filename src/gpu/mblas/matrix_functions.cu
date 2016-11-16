@@ -93,7 +93,8 @@ Matrix& Concat(Matrix& Out, const Matrix& In) {
 
 Matrix& Copy(Matrix& Out, const Matrix& In) {
   Out.Resize(In.Rows(), In.Cols(), 1);
-  mblas::copy(In.begin(), In.end(), Out.begin());
+
+  Out.copy(In);
   return Out;
 }
 
