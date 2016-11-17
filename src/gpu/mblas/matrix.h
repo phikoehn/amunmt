@@ -25,6 +25,7 @@ class TMatrix : public BaseMatrix {
 
     TMatrix()
     :data2_(NULL)
+    ,owner_(true)
     {
         //std::cerr << "TMatrix(1)=" << data2_ << std::endl;
     }
@@ -34,6 +35,7 @@ class TMatrix : public BaseMatrix {
     : BaseMatrix(shape)
     //, data_(shape_.elements(), 0.0f)
     //, data_(shape_.elements())
+    ,owner_(true)
     {
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       cudaDeviceSynchronize();
@@ -47,6 +49,7 @@ class TMatrix : public BaseMatrix {
     : BaseMatrix(m)
     //, data_(std::move(m.data_))
     //, data_(shape_.elements())
+    ,owner_(true)
     {
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       cudaDeviceSynchronize();
@@ -60,11 +63,20 @@ class TMatrix : public BaseMatrix {
       //std::cerr << "TMatrix(3)=" << data2_ << std::endl;
     }
 
+    TMatrix(const TMatrix &m, size_t sliceInd)
+    :BaseMatrix({m.shape(0), m.shape(1), 1})
+    ,owner_(false)
+	,data2_(m.data2_ + m.shape_.matrixSize() * sliceInd)
+    {
+    }
+
     TMatrix(const TMatrix& m) = delete;
 
     ~TMatrix() {
       //std::cerr << "destrucor=" << data2_ << std::endl;
-      //HANDLE_ERROR( cudaFree(data2_) );
+      if (owner_) {
+    	  HANDLE_ERROR( cudaFree(data2_) );
+      }
     }
 
     value_type operator()(size_t i, size_t j, size_t k) const {
@@ -163,9 +175,14 @@ class TMatrix : public BaseMatrix {
       cudaDeviceSynchronize();
     }
 
+    TMatrix Slice(size_t sliceInd) const {
+    	return TMatrix(*this, sliceInd);
+    }
+
   private:
     //VecType data_;
     value_type *data2_;
+    bool owner_;
 
 };
 
