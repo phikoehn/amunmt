@@ -52,7 +52,7 @@ class Decoder {
                              const DeviceVector<int>& mapping) {
           using namespace mblas;
 
-          Temp2_.Resize(batchSize, SourceContext.shape(1), 1);
+          Temp2_.Resize({batchSize, SourceContext.shape(1), 1});
           Mean(Temp2_, SourceContext, mapping);
           Prod(State, Temp2_, w_.Wi_);
           BroadcastVec(Tanh(_1 + _2), State, w_.Bi_);
@@ -122,7 +122,7 @@ class Decoder {
 
           size_t rows1 = SourceContext.shape(0);
           size_t rows2 = HiddenState.shape(0);
-          A_.Reshape(rows2, rows1, 1); // due to broadcasting above
+          A_.Reshape({rows2, rows1, 1}); // due to broadcasting above
           Element(_1 + WC_, A_);
 
           mblas::Softmax(A_);
@@ -181,11 +181,11 @@ class Decoder {
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
 
           if(!filtered_) {
-            Probs.Resize(T1_.shape(0), w_.W4_.shape(1), 1);
+            Probs.Resize({T1_.shape(0), w_.W4_.shape(1), 1});
             Prod(Probs, T1_, w_.W4_);
             BroadcastVec(_1 + _2, Probs, w_.B4_);
           } else {
-            Probs.Resize(T1_.shape(0), FilteredW4_.shape(1), 1);
+            Probs.Resize({T1_.shape(0), FilteredW4_.shape(1), 1});
             Prod(Probs, T1_, FilteredW4_);
             BroadcastVec(_1 + _2, Probs, FilteredB4_);
           }
@@ -254,7 +254,7 @@ class Decoder {
     }
 
     void EmptyEmbedding(mblas::Matrix& Embedding, size_t batchSize = 1) {
-      Embedding.Resize(batchSize, embeddings_.GetCols(), 1);
+      Embedding.Resize({batchSize, embeddings_.GetCols(), 1});
       mblas::Fill(Embedding, 0);
     }
 

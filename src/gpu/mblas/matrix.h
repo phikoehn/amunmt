@@ -76,10 +76,10 @@ class TMatrix : public BaseMatrix {
       return ret;
     }
 
-    void Resize(size_t rows, size_t cols, size_t batchSize) {
+    void Resize(const Shape &shape) {
       size_t oldSize = shape_.elements();
 
-      Reshape(rows, cols, batchSize);
+      Reshape(shape);
 
       if (shape_.elements() > oldSize) {
         //data_.resize(shape_.elements());
