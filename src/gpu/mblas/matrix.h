@@ -10,6 +10,7 @@
 #include <boost/pool/object_pool.hpp>
 #endif
 
+#include "handles.h"
 #include "gpu/types-gpu.h"
 
 namespace GPU {
@@ -37,10 +38,10 @@ class TMatrix : public BaseMatrix {
     //, data_(shape_.elements())
     ,owner_(true)
     {
+      cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
+
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
-      cudaDeviceSynchronize();
-      HANDLE_ERROR( cudaMemset(data(), 0, shape_.elements() * sizeof(value_type)) );
-      cudaDeviceSynchronize();
+      HANDLE_ERROR( cudaMemsetAsync(data(), 0, shape_.elements() * sizeof(value_type), stream) );
 
       //std::cerr << "TMatrix(2)=" << data2_ << std::endl;
     }
@@ -51,14 +52,15 @@ class TMatrix : public BaseMatrix {
     //, data_(shape_.elements())
     ,owner_(true)
     {
+      cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
+
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
-      cudaDeviceSynchronize();
-      HANDLE_ERROR( cudaMemcpy(
+      HANDLE_ERROR( cudaMemcpyAsync(
           data(),
           m.data(),
           shape_.elements() * sizeof(value_type),
-          cudaMemcpyDeviceToDevice) );
-      cudaDeviceSynchronize();
+          cudaMemcpyDeviceToDevice,
+          stream) );
 
       //std::cerr << "TMatrix(3)=" << data2_ << std::endl;
     }
@@ -66,7 +68,7 @@ class TMatrix : public BaseMatrix {
     TMatrix(const TMatrix &m, size_t sliceInd)
     :BaseMatrix({m.shape(0), m.shape(1), 1})
     ,owner_(false)
-	,data2_(m.data2_ + m.shape_.matrixSize() * sliceInd)
+    ,data2_(m.data2_ + m.shape_.matrixSize() * sliceInd)
     {
     }
 
@@ -82,8 +84,9 @@ class TMatrix : public BaseMatrix {
     value_type operator()(size_t i, size_t j, size_t k) const {
       value_type ret;
       const value_type &src = data()[k * shape_.numSlices() + i * shape_[1] + j];
-      HANDLE_ERROR( cudaMemcpy(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost) );
-      cudaDeviceSynchronize();
+
+      cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
+      HANDLE_ERROR( cudaMemcpyAsync(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost, stream) );
 
       return ret;
     }
@@ -95,21 +98,15 @@ class TMatrix : public BaseMatrix {
 
       if (shape_.elements() > oldSize) {
         //data_.resize(shape_.elements());
+        cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
 
         value_type *temp;
         HANDLE_ERROR( cudaMalloc(&temp, shape_.elements() * sizeof(value_type)) );
-        cudaDeviceSynchronize();
 
         if (oldSize) {
-        	HANDLE_ERROR( cudaMemcpy(temp, data(), oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice) );
-            cudaDeviceSynchronize();
+        	HANDLE_ERROR( cudaMemcpyAsync(temp, data(), oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice, stream) );
         }
-        /*
-        std::cerr << "Resize="
-        		<< data2_ << "(" << oldSize << ") "
-        		<< temp << "(" << shape_.elements() << ")"
-        		<< std::endl;
-		*/
+
         HANDLE_ERROR( cudaFree(data2_) );
 
         data2_ = temp;
@@ -158,21 +155,23 @@ class TMatrix : public BaseMatrix {
     }
 
     void copy(const TMatrix &other, size_t outOffset = 0) {
-      HANDLE_ERROR( cudaMemcpy(
+      cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
+      HANDLE_ERROR( cudaMemcpyAsync(
           data() + outOffset,
           other.data(),
           other.shape_.elements() * sizeof(value_type),
-          cudaMemcpyDeviceToDevice) );
-      cudaDeviceSynchronize();
+          cudaMemcpyDeviceToDevice,
+          stream) );
     }
 
     void copy(const TMatrix &other, size_t inStart, size_t inLength) {
-      HANDLE_ERROR( cudaMemcpy(
+      cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
+      HANDLE_ERROR( cudaMemcpyAsync(
           data(),
           other.data() + inStart,
           inLength * sizeof(value_type),
-          cudaMemcpyDeviceToDevice) );
-      cudaDeviceSynchronize();
+          cudaMemcpyDeviceToDevice,
+          stream) );
     }
 
     TMatrix Slice(size_t sliceInd) const {
