@@ -2,7 +2,6 @@
 #include "translation_task.h"
 #include "search.h"
 
-//History TranslationTask(const Sentence *sentence, size_t taskCounter) {
 Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   thread_local std::unique_ptr<Search> search;
   if(!search) {
@@ -11,5 +10,9 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   }
 
   assert(sentences->size());
-  return search->Decode(*sentences);
+  Histories ret = search->Decode(*sentences);
+
+  delete sentences;
+
+  return ret;
 }
