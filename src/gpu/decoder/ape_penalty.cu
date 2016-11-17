@@ -32,9 +32,9 @@ void ApePenalty::SetSource(const Sentence& source) {
 
 // @TODO: make this work on GPU
 void ApePenalty::Score(const State& in, State& out) {
-  size_t cols = Probs_.Cols();
+  size_t cols = Probs_.shape(1);
   costs_.resize(cols, -1.0);
-  for(size_t i = 0; i < Probs_.Rows(); ++i) {
+  for(size_t i = 0; i < Probs_.shape(1); ++i) {
     algo::copy(costs_.begin(), costs_.begin() + cols, Probs_.data() + i * cols);
   }
 }

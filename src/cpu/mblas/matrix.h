@@ -66,7 +66,7 @@ class BlazeMatrix : public BaseMatrix, public blaze::CustomMatrix<T, blaze::unal
     virtual std::string Debug() const
     {
     	std::stringstream strm;
-    	strm << "(" << Rows() << "x" << Cols() << ")";
+    	strm << "(" << shape(0) << "x" << shape(1) << ")";
     	return strm.str();
     }
 

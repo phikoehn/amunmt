@@ -28,7 +28,7 @@ class Decoder {
         }
 
         size_t GetCols() {
-          return w_.E_.Cols();
+          return w_.E_.shape(1);
         }
 
         size_t GetRows() const {
@@ -52,7 +52,7 @@ class Decoder {
                              const DeviceVector<int>& mapping) {
           using namespace mblas;
 
-          Temp2_.Resize(batchSize, SourceContext.Cols(), 1);
+          Temp2_.Resize(batchSize, SourceContext.shape(1), 1);
           Mean(Temp2_, SourceContext, mapping);
           Prod(State, Temp2_, w_.Wi_);
           BroadcastVec(Tanh(_1 + _2), State, w_.Bi_);
@@ -181,11 +181,11 @@ class Decoder {
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
 
           if(!filtered_) {
-            Probs.Resize(T1_.Rows(), w_.W4_.Cols(), 1);
+            Probs.Resize(T1_.Rows(), w_.W4_.shape(1), 1);
             Prod(Probs, T1_, w_.W4_);
             BroadcastVec(_1 + _2, Probs, w_.B4_);
           } else {
-            Probs.Resize(T1_.Rows(), FilteredW4_.Cols(), 1);
+            Probs.Resize(T1_.Rows(), FilteredW4_.shape(1), 1);
             Prod(Probs, T1_, FilteredW4_);
             BroadcastVec(_1 + _2, Probs, FilteredB4_);
           }

@@ -25,7 +25,7 @@ class BestHyps {
     void FindBests(size_t beamSize, mblas::Matrix& Probs,
                    std::vector<float>& outCosts,
                    std::vector<unsigned>& outKeys) {
-      size_t nElements = Probs.Cols() * Probs.Rows();
+      size_t nElements = Probs.shape().elements();
 
       // if (beamSize < 6) {
         nthElement_.getNBestList(Probs.data(), nElements, beamSize, outKeys, outCosts);
@@ -54,7 +54,7 @@ class BestHyps {
       for (auto& scorer : scorers) {
         if (GPU::EncoderDecoder* encdec = dynamic_cast<GPU::EncoderDecoder*>(scorer.get())) {
           mblas::Matrix& attention = encdec->GetAttention();
-          size_t attLength = attention.Cols();
+          size_t attLength = attention.shape(1);
 
           SoftAlignment *softAlignment
             = new SoftAlignment(attention.data() + hypIndex * attLength,
@@ -116,12 +116,12 @@ class BestHyps {
       bool filter = God::Get<std::vector<std::string>>("softmax-filter").size();
 
       for (size_t i = 0; i < beamSize; i++) {
-        size_t wordIndex = bestKeys[i] % Probs.Cols();
+        size_t wordIndex = bestKeys[i] % Probs.shape(1);
         if (filter) {
           wordIndex = filterIndices[wordIndex];
         }
 
-        size_t hypIndex  = bestKeys[i] / Probs.Cols();
+        size_t hypIndex  = bestKeys[i] / Probs.shape(1);
         float cost = bestCosts[i];
 
         HypothesisPtr hyp;

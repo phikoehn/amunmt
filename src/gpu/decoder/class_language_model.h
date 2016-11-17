@@ -25,8 +25,8 @@ class ClassLanguageModel : public LanguageModel {
       const LMState& lmIn = in.get<LMState>();
       LMState& lmOut = out.get<LMState>();
       
-      size_t rows = prob.Rows();
-      size_t cols = prob.Cols();
+      size_t rows = prob.shape(0);
+      size_t cols = prob.shape(1);
       
       std::vector<float> costs(rows * cols);
       const std::vector<KenlmState>& inStates = lmIn.GetStates();

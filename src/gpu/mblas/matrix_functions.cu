@@ -50,9 +50,9 @@ __global__ void gMean(float* d_out, const float* d_in, const int* mapping,
 }
 
 void Mean(Matrix& Out, const Matrix& In, const DeviceVector<int>& mapping) {
-  int batchNum = Out.Rows();
-  int stateLength = Out.Cols();
-  int sentenceLength = In.Rows() / batchNum;
+  int batchNum = Out.shape(0);
+  int stateLength = Out.shape(1);
+  int sentenceLength = In.shape(0) / batchNum;
 
   int nThreads = 512;
   int nBlocks =  (stateLength / 512) + ((stateLength % 512 == 0) ?  0 : 1);
@@ -63,8 +63,8 @@ void Mean(Matrix& Out, const Matrix& In, const DeviceVector<int>& mapping) {
 }
 
 Matrix& Transpose(Matrix& Out, const Matrix& In) {
-  size_t m = In.Rows();
-  size_t n = In.Cols();
+  size_t m = In.shape(0);
+  size_t n = In.shape(1);
 
   Out.Resize(n, m, 1);
 
@@ -86,14 +86,14 @@ Matrix& Transpose(Matrix& Out) {
 
 Matrix& Concat(Matrix& Out, const Matrix& In) {
   size_t oldSize = Out.size();
-  Out.Resize(Out.Rows() + In.Rows(), Out.Cols(), 1);
+  Out.Resize(Out.shape(0) + In.shape(0), Out.shape(1), 1);
 
   Out.copy(In, oldSize);
   return Out;
 }
 
 Matrix& Copy(Matrix& Out, const Matrix& In) {
-  Out.Resize(In.Rows(), In.Cols(), 1);
+  Out.Resize(In.shape(0), In.shape(1), 1);
 
   Out.copy(In);
   return Out;
@@ -109,20 +109,20 @@ __global__ void gPasteRows(float* d_out, int outRows, int outCols, const float* 
   }
 }
 void PasteRows(Matrix& Out, const Matrix& In, const size_t rowNo, size_t colNo, size_t sparse) {
-  int nColumns = In.Cols();
-  int nRows = In.Rows();
+  int nColumns = In.shape(1);
+  int nRows = In.shape(0);
   int nThreads = 512;
   int nBlocks =  (In.size() / 512) + ((In.size() % 512 == 0) ?  0 : 1);
 
 
   gPasteRows<<<nBlocks, nThreads, 0, CudaStreamHandler::GetStream()>>>
-    (Out.data(), rowNo, Out.Cols(), In.data(), In.Rows(), In.Cols(), colNo, sparse);
+    (Out.data(), rowNo, Out.shape(1), In.data(), In.shape(0), In.shape(1), colNo, sparse);
 }
 
 Matrix& PasteRow(Matrix& Out,
                  const Matrix& In,
                  const size_t r, const size_t c) {
-  size_t start = r * Out.Cols() + c;
+  size_t start = r * Out.shape(1) + c;
   Out.copy(In, start);
 
   return Out;
@@ -131,9 +131,9 @@ Matrix& PasteRow(Matrix& Out,
 Matrix& CopyRow(Matrix& Out,
                 const Matrix& In,
                 const size_t r, const size_t c) {
-  size_t length = In.Cols() - c;
+  size_t length = In.shape(1) - c;
   Out.Resize(1, length, 1);
-  size_t start = r * In.Cols() + c;
+  size_t start = r * In.shape(1) + c;
 
   Out.copy(In, start, length);
 
@@ -167,11 +167,11 @@ Matrix& CopyRows(Matrix& Out,
   float* d_out = Out.data();
   const float* d_in = In.data();
 
-  int threads = std::min(MAX_THREADS, (int)In.Cols());
+  int threads = std::min(MAX_THREADS, (int)In.shape(1));
   int blocks = std::min(MAX_BLOCKS, (int)numPairs);;
 
   gCopyRows<<<blocks, threads, 0, CudaStreamHandler::GetStream()>>>
-    (d_out, d_in, In.Cols(), dev, numPairs);
+    (d_out, d_in, In.shape(1), dev, numPairs);
 
   return Out;
 }
@@ -180,7 +180,7 @@ Matrix& CopyRows(Matrix& Out,
 Matrix& Assemble(Matrix& Out,
                  const Matrix& In,
                  const DeviceVector<size_t>& indeces) {
-  Out.Resize(indeces.size(), In.Cols(), 1);
+  Out.Resize(indeces.size(), In.shape(1), 1);
   CopyRows(Out, In, thrust::raw_pointer_cast(indeces.data()), indeces.size());
   return Out;
 }
@@ -216,7 +216,7 @@ Matrix& Slice(Matrix& Out,
   int blocks = std::min(MAX_BLOCKS, (int)In.Rows());
 
   gSlice<<<blocks, threads, 0, CudaStreamHandler::GetStream()>>>
-    (d_out, d_in, n, dim, In.Rows(), In.Cols());
+    (d_out, d_in, n, dim, In.Rows(), In.shape(1));
   return Out;
 }
 
@@ -226,18 +226,18 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   Matrix::value_type beta = 0.0;
 
   size_t m = A.Rows();
-  size_t k = A.Cols();
+  size_t k = A.shape(1);
   if(transA)
     std::swap(m, k);
 
   size_t l = B.Rows();
-  size_t n = B.Cols();
+  size_t n = B.shape(1);
   if(transB)
     std::swap(l, n);
 
-  size_t lda = A.Cols();
-  size_t ldb = B.Cols();
-  size_t ldc = B.Cols();
+  size_t lda = A.shape(1);
+  size_t ldb = B.shape(1);
+  size_t ldc = B.shape(1);
 
   if(transB)
     ldc = B.Rows();
@@ -300,11 +300,11 @@ __global__ void gSoftMax(float* softMaxP, size_t rows, size_t cols) {
 
 Matrix& Softmax(Matrix& Out) {
   int blocks = std::min(MAX_BLOCKS, (int)Out.Rows());
-  int threads = std::min(MAX_THREADS, (int)Out.Cols());
+  int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   int shared = sizeof(float) * threads * 2;
 
   gSoftMax<<<blocks, threads, shared, CudaStreamHandler::GetStream()>>>
-    (Out.data(), Out.Rows(), Out.Cols());
+    (Out.data(), Out.Rows(), Out.shape(1));
   return Out;
 }
 
@@ -350,11 +350,11 @@ __global__ void gLogSoftMax(float* softMaxP, size_t rows, size_t cols) {
 
 Matrix& LogSoftmax(Matrix& Out) {
   int blocks = std::min(MAX_BLOCKS, (int)Out.Rows());
-  int threads = std::min(MAX_THREADS, (int)Out.Cols());
+  int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   int shared = sizeof(float) * threads * 2;
 
   gLogSoftMax<<<blocks, threads, shared, CudaStreamHandler::GetStream()>>>
-    (Out.data(), Out.Rows(), Out.Cols());
+    (Out.data(), Out.Rows(), Out.shape(1));
 
   return Out;
 }
@@ -369,7 +369,7 @@ __global__ void gSetColumn(float* d_in, int n_columns, int n_rows, int noColumn,
 }
 
 void SetColumn(Matrix& In, int noColumn, float value) {
-  int nColumns = In.Cols();
+  int nColumns = In.shape(1);
   int nRows = In.Rows();
   int nBlocks = nRows / 512 + (nRows % 512 == 0) ?  0 : 1;
   int nThreads = std::min(512, nRows);
