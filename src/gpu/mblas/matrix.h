@@ -95,8 +95,6 @@ class TMatrix : public BaseMatrix {
         value_type *temp;
         HANDLE_ERROR( cudaMalloc(&temp, shape_.elements() * sizeof(value_type)) );
         cudaDeviceSynchronize();
-        HANDLE_ERROR( cudaMemset(temp, 0, shape_.elements() * sizeof(value_type)) );
-        cudaDeviceSynchronize();
 
         if (oldSize) {
         	HANDLE_ERROR( cudaMemcpy(temp, data(), oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice) );
@@ -109,7 +107,7 @@ class TMatrix : public BaseMatrix {
         		<< std::endl;
 		*/
         HANDLE_ERROR( cudaFree(data2_) );
-        cudaDeviceSynchronize();
+
         data2_ = temp;
       }
     }
