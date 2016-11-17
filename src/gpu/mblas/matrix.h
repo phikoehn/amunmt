@@ -30,8 +30,8 @@ class TMatrix : public BaseMatrix {
     }
 
     // always init to zero
-    TMatrix(size_t rows, size_t cols, size_t batchSize)
-    : BaseMatrix({rows, cols, batchSize})
+    TMatrix(const Shape &shape)
+    : BaseMatrix(shape)
     //, data_(shape_.elements(), 0.0f)
     //, data_(shape_.elements())
     {
