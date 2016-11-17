@@ -36,10 +36,8 @@ class TMatrix : public BaseMatrix {
     //, data_(shape_.elements())
     {
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
       HANDLE_ERROR( cudaMemset(data(), 0, shape_.elements() * sizeof(value_type)) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
 
       //std::cerr << "TMatrix(2)=" << data2_ << std::endl;
@@ -51,14 +49,12 @@ class TMatrix : public BaseMatrix {
     //, data_(shape_.elements())
     {
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
       HANDLE_ERROR( cudaMemcpy(
           data(),
           m.data(),
           shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
 
       //std::cerr << "TMatrix(3)=" << data2_ << std::endl;
@@ -75,7 +71,6 @@ class TMatrix : public BaseMatrix {
       value_type ret;
       const value_type &src = data()[i * shape_[1] + j];
       HANDLE_ERROR( cudaMemcpy(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
 
       return ret;
@@ -99,15 +94,12 @@ class TMatrix : public BaseMatrix {
 
         value_type *temp;
         HANDLE_ERROR( cudaMalloc(&temp, shape_.elements() * sizeof(value_type)) );
-        cudaStreamSynchronize(0);
         cudaDeviceSynchronize();
         HANDLE_ERROR( cudaMemset(temp, 0, shape_.elements() * sizeof(value_type)) );
-        cudaStreamSynchronize(0);
         cudaDeviceSynchronize();
 
         if (oldSize) {
         	HANDLE_ERROR( cudaMemcpy(temp, data(), oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice) );
-            cudaStreamSynchronize(0);
             cudaDeviceSynchronize();
         }
         /*
@@ -117,7 +109,6 @@ class TMatrix : public BaseMatrix {
         		<< std::endl;
 		*/
         HANDLE_ERROR( cudaFree(data2_) );
-        cudaStreamSynchronize(0);
         cudaDeviceSynchronize();
         data2_ = temp;
       }
@@ -170,7 +161,6 @@ class TMatrix : public BaseMatrix {
           other.data(),
           other.shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
     }
 
@@ -180,7 +170,6 @@ class TMatrix : public BaseMatrix {
           other.data() + inStart,
           inLength * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
-      cudaStreamSynchronize(0);
       cudaDeviceSynchronize();
     }
 
