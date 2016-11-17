@@ -67,9 +67,9 @@ class TMatrix : public BaseMatrix {
       //HANDLE_ERROR( cudaFree(data2_) );
     }
 
-    value_type operator()(size_t i, size_t j) const {
+    value_type operator()(size_t i, size_t j, size_t k) const {
       value_type ret;
-      const value_type &src = data()[i * shape_[1] + j];
+      const value_type &src = data()[k * shape_.numSlices() + i * shape_[1] + j];
       HANDLE_ERROR( cudaMemcpy(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost) );
       cudaDeviceSynchronize();
 

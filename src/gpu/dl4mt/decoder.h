@@ -93,7 +93,7 @@ class Decoder {
       public:
         Alignment(const Weights& model)
         : w_(model),
-          WC_(w_.C_(0,0))
+          WC_(w_.C_(0,0,0))
         {
           //for(int i = 0; i < 2; ++i) {
           //  cudaStreamCreate(&s_[i]);
