@@ -50,7 +50,7 @@
        *
        * @param i A list of integers representing the size of each dimension.
        */
-      Shape(std::initializer_list<size_t> il) {
+      Shape(const std::initializer_list<size_t> &il) {
        std::copy(il.begin(), il.end(), begin());
       }
 

@@ -19,8 +19,8 @@ class BaseMatrix {
   : shape_({0, 0, 0})
   {}
 
-  BaseMatrix(size_t rows, size_t cols, size_t batchSize)
-  : shape_({rows, cols, batchSize})
+  BaseMatrix(const Shape &shape)
+  : shape_(shape)
   {}
 
   BaseMatrix(const BaseMatrix &m)
