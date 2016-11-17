@@ -19,7 +19,7 @@ namespace mblas {
 template <class M>
 void Debug(const M& m, size_t pos = 0, size_t l = 8) {
   std::cerr << m.Rows() << " " << m.shape(1) << std::endl;
-  for(size_t i = 0; i < m.Rows(); ++i) {
+  for(size_t i = 0; i < m.shape(0); ++i) {
     for(size_t j = pos; j < m.shape(1) && j < pos + l; ++j) {
       std::cerr << m.GetVec()[i * m.shape(1) + j] << " ";
     }
@@ -110,8 +110,8 @@ __global__ void gBroadcast(Functor functor,
 
 template <class Functor>
 Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In) {
-  size_t rows1 = Out.Rows();
-  size_t rows2 = In.Rows();
+  size_t rows1 = Out.shape(0);
+  size_t rows2 = In.shape(0);
 
   size_t rows = rows1 * rows2;
   size_t cols  = Out.shape(1);
@@ -167,7 +167,7 @@ __global__ void gBroadcastVecColumn(Functor functor,
 
 template <class Functor>
 Matrix& BroadcastVecColumn(Functor functor, Matrix& Out, const DeviceVector<float>& In) {
-  size_t rows  = Out.Rows();
+  size_t rows  = Out.shape(0);
   size_t cols = Out.shape(1);
 
   float* d_out = Out.data();
@@ -198,7 +198,7 @@ __global__ void gBroadcastVec(Functor functor,
 
 template <class Functor>
 Matrix& BroadcastVec(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
-  size_t rows  = Out.Rows();
+  size_t rows  = Out.shape(0);
   size_t cols = Out.shape(1);
 
   float* d_out = Out.data();
@@ -272,12 +272,12 @@ __global__ void gElement(Functor functor,
 template <class Functor>
 Matrix& Element(Functor functor, Matrix& Out) {
   float* d_out = Out.data();
-  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.shape(0));
   int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   cudaStream_t& stream = CudaStreamHandler::GetStream();
 
   gElement<<<blocks, threads, 0, stream>>>
-    (functor, d_out, Out.Rows(), Out.shape(1));
+    (functor, d_out, Out.shape(0), Out.shape(1));
 
   return Out;
 }
@@ -288,12 +288,12 @@ Matrix& Element(Functor functor,
   float* d_out = Out.data();
   const float* d_in = In.data();
 
-  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.shape(0));
   int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   cudaStream_t& stream = CudaStreamHandler::GetStream();
 
   gElement<<<blocks, threads, 0, stream>>>
-    (functor, d_out, d_in, Out.Rows(), Out.shape(1));
+    (functor, d_out, d_in, Out.shape(0), Out.shape(1));
 
   return Out;
 }
@@ -306,12 +306,12 @@ Matrix& Element(Functor functor,
   const float* d_in1 = In1.data();
   const float* d_in2 = In2.data();
 
-  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.shape(0));
   int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   cudaStream_t& stream = CudaStreamHandler::GetStream();
 
   gElement<<<blocks, threads, 0, stream>>>
-    (functor, d_out, d_in1, d_in2, Out.Rows(), Out.shape(1));
+    (functor, d_out, d_in1, d_in2, Out.shape(0), Out.shape(1));
 
   return Out;
 }

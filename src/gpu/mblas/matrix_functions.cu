@@ -207,16 +207,16 @@ Matrix& Slice(Matrix& Out,
               const Matrix& In,
               size_t n, size_t dim) {
 
-  Out.Resize(In.Rows(), dim, 1);
+  Out.Resize(In.shape(0), dim, 1);
 
   float* d_out = Out.data();
   const float* d_in = In.data();
 
   int threads = std::min(MAX_THREADS, (int)dim);
-  int blocks = std::min(MAX_BLOCKS, (int)In.Rows());
+  int blocks = std::min(MAX_BLOCKS, (int)In.shape(0));
 
   gSlice<<<blocks, threads, 0, CudaStreamHandler::GetStream()>>>
-    (d_out, d_in, n, dim, In.Rows(), In.shape(1));
+    (d_out, d_in, n, dim, In.shape(0), In.shape(1));
   return Out;
 }
 
@@ -225,12 +225,12 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   Matrix::value_type alpha = 1.0;
   Matrix::value_type beta = 0.0;
 
-  size_t m = A.Rows();
+  size_t m = A.shape(0);
   size_t k = A.shape(1);
   if(transA)
     std::swap(m, k);
 
-  size_t l = B.Rows();
+  size_t l = B.shape(0);
   size_t n = B.shape(1);
   if(transB)
     std::swap(l, n);
@@ -240,7 +240,7 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   size_t ldc = B.shape(1);
 
   if(transB)
-    ldc = B.Rows();
+    ldc = B.shape(0);
 
   C.Resize(m, n, 1);
 
@@ -299,12 +299,12 @@ __global__ void gSoftMax(float* softMaxP, size_t rows, size_t cols) {
 }
 
 Matrix& Softmax(Matrix& Out) {
-  int blocks = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks = std::min(MAX_BLOCKS, (int)Out.shape(0));
   int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   int shared = sizeof(float) * threads * 2;
 
   gSoftMax<<<blocks, threads, shared, CudaStreamHandler::GetStream()>>>
-    (Out.data(), Out.Rows(), Out.shape(1));
+    (Out.data(), Out.shape(0), Out.shape(1));
   return Out;
 }
 
@@ -349,12 +349,12 @@ __global__ void gLogSoftMax(float* softMaxP, size_t rows, size_t cols) {
 
 
 Matrix& LogSoftmax(Matrix& Out) {
-  int blocks = std::min(MAX_BLOCKS, (int)Out.Rows());
+  int blocks = std::min(MAX_BLOCKS, (int)Out.shape(0));
   int threads = std::min(MAX_THREADS, (int)Out.shape(1));
   int shared = sizeof(float) * threads * 2;
 
   gLogSoftMax<<<blocks, threads, shared, CudaStreamHandler::GetStream()>>>
-    (Out.data(), Out.Rows(), Out.shape(1));
+    (Out.data(), Out.shape(0), Out.shape(1));
 
   return Out;
 }
@@ -370,7 +370,7 @@ __global__ void gSetColumn(float* d_in, int n_columns, int n_rows, int noColumn,
 
 void SetColumn(Matrix& In, int noColumn, float value) {
   int nColumns = In.shape(1);
-  int nRows = In.Rows();
+  int nRows = In.shape(0);
   int nBlocks = nRows / 512 + (nRows % 512 == 0) ?  0 : 1;
   int nThreads = std::min(512, nRows);
 

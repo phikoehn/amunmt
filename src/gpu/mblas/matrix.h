@@ -76,10 +76,6 @@ class TMatrix : public BaseMatrix {
       return ret;
     }
 
-    size_t Rows() const {
-      return shape_[0];
-    }
-
     void Resize(size_t rows, size_t cols, size_t batchSize) {
       size_t oldSize = shape_.elements();
 
@@ -112,8 +108,8 @@ class TMatrix : public BaseMatrix {
     {
       std::stringstream strm;
       /*
-      strm << Rows() << "x" << shape(1) << ":";
-      for (size_t row = 0; row < Rows(); ++row) {
+      strm << shape(0) << "x" << shape(1) << ":";
+      for (size_t row = 0; row < shape(0); ++row) {
         value_type rowSum = 0;
         for (size_t col = 0; col < shape(1); ++col) {
           rowSum += (*this)(row, col);

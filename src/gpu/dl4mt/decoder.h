@@ -20,7 +20,7 @@ class Decoder {
           using namespace mblas;
           thrust::host_vector<size_t> tids = ids;
           for(auto&& id : tids)
-            if(id >= w_.E_.Rows())
+            if(id >= w_.E_.shape(0))
               id = 1;
           indeces_.resize(tids.size());
           mblas::copy_n(tids.begin(), tids.size(), indeces_.begin());
@@ -32,7 +32,7 @@ class Decoder {
         }
 
         size_t GetRows() const {
-          return w_.E_.Rows();
+          return w_.E_.shape(0);
         }
 
       private:
@@ -120,8 +120,8 @@ class Decoder {
 
           Prod(A_, w_.V_, Temp1_, false, true);
 
-          size_t rows1 = SourceContext.Rows();
-          size_t rows2 = HiddenState.Rows();
+          size_t rows1 = SourceContext.shape(0);
+          size_t rows2 = HiddenState.shape(0);
           A_.Reshape(rows2, rows1, 1); // due to broadcasting above
           Element(_1 + WC_, A_);
 
@@ -181,11 +181,11 @@ class Decoder {
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
 
           if(!filtered_) {
-            Probs.Resize(T1_.Rows(), w_.W4_.shape(1), 1);
+            Probs.Resize(T1_.shape(0), w_.W4_.shape(1), 1);
             Prod(Probs, T1_, w_.W4_);
             BroadcastVec(_1 + _2, Probs, w_.B4_);
           } else {
-            Probs.Resize(T1_.Rows(), FilteredW4_.shape(1), 1);
+            Probs.Resize(T1_.shape(0), FilteredW4_.shape(1), 1);
             Prod(Probs, T1_, FilteredW4_);
             BroadcastVec(_1 + _2, Probs, FilteredB4_);
           }

@@ -46,7 +46,7 @@ class SlowGRU {
     }
 
     size_t GetStateLength() const {
-      return w_.U_.Rows();
+      return w_.U_.shape(0);
     }
 
   private:
@@ -127,7 +127,7 @@ class FastGRU {
     }
 
     size_t GetStateLength() const {
-      return w_.U_.Rows();
+      return w_.U_.shape(0);
     }
 
 

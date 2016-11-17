@@ -20,7 +20,7 @@ class Encoder {
         void Lookup(mblas::Matrix& Row, const Words& words) {
           thrust::host_vector<size_t> knownWords(words.size(), 1);
           for (size_t i = 0; i < words.size(); ++i) {
-            if (words[i] < w_.E_.Rows()) {
+            if (words[i] < w_.E_.shape(0)) {
               knownWords[i] = words[i];
             }
           }
