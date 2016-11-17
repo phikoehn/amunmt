@@ -24,7 +24,7 @@ class TMatrix : public BaseMatrix {
     typedef typename VecType::value_type value_type;
 
     TMatrix()
-    //:data2_(NULL)
+    :data2_(NULL)
     {
         //std::cerr << "TMatrix(1)=" << data2_ << std::endl;
     }
@@ -33,24 +33,34 @@ class TMatrix : public BaseMatrix {
     TMatrix(size_t rows, size_t cols, size_t batchSize)
     : BaseMatrix(rows, cols, batchSize)
     //, data_(shape_.elements(), 0.0f)
-    , data_(shape_.elements())
+    //, data_(shape_.elements())
     {
-      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
+      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
       HANDLE_ERROR( cudaMemset(data(), 0, shape_.elements() * sizeof(value_type)) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
+
       //std::cerr << "TMatrix(2)=" << data2_ << std::endl;
     }
 
     TMatrix(TMatrix&& m)
     : BaseMatrix(m)
     //, data_(std::move(m.data_))
-    , data_(shape_.elements())
+    //, data_(shape_.elements())
     {
-      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
+      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
       HANDLE_ERROR( cudaMemcpy(
           data(),
           m.data(),
           shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
+
       //std::cerr << "TMatrix(3)=" << data2_ << std::endl;
     }
 
@@ -65,6 +75,8 @@ class TMatrix : public BaseMatrix {
       value_type ret;
       const value_type &src = data()[i * shape_[1] + j];
       HANDLE_ERROR( cudaMemcpy(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
 
       return ret;
     }
@@ -83,20 +95,31 @@ class TMatrix : public BaseMatrix {
       Reshape(rows, cols, batchSize);
 
       if (shape_.elements() > oldSize) {
-        data_.resize(shape_.elements());
+        //data_.resize(shape_.elements());
 
-        /*
         value_type *temp;
         HANDLE_ERROR( cudaMalloc(&temp, shape_.elements() * sizeof(value_type)) );
-        HANDLE_ERROR( cudaMemcpy(temp, data2_, oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice) );
+        cudaStreamSynchronize(0);
+        cudaDeviceSynchronize();
+        HANDLE_ERROR( cudaMemset(temp, 0, shape_.elements() * sizeof(value_type)) );
+        cudaStreamSynchronize(0);
+        cudaDeviceSynchronize();
+
+        if (oldSize) {
+        	HANDLE_ERROR( cudaMemcpy(temp, data(), oldSize * sizeof(value_type), cudaMemcpyDeviceToDevice) );
+            cudaStreamSynchronize(0);
+            cudaDeviceSynchronize();
+        }
+        /*
         std::cerr << "Resize="
         		<< data2_ << "(" << oldSize << ") "
         		<< temp << "(" << shape_.elements() << ")"
         		<< std::endl;
-
+		*/
         HANDLE_ERROR( cudaFree(data2_) );
+        cudaStreamSynchronize(0);
+        cudaDeviceSynchronize();
         data2_ = temp;
-        */
       }
     }
 
@@ -117,13 +140,13 @@ class TMatrix : public BaseMatrix {
     }
 
     value_type* data() {
-      return thrust::raw_pointer_cast(data_.data());
-      //return data2_;
+      //return thrust::raw_pointer_cast(data_.data());
+      return data2_;
     }
 
     const value_type* data() const {
-      return thrust::raw_pointer_cast(data_.data());
-      //return data2_;
+      //return thrust::raw_pointer_cast(data_.data());
+      return data2_;
     }
 
     size_t size() const {
@@ -133,12 +156,12 @@ class TMatrix : public BaseMatrix {
     void swap(TMatrix &other) {
       shape_.swap(other.shape_);
 
-      data_.swap(other.data_);
-      /*
+      //data_.swap(other.data_);
+
       value_type *temp = data2_;
       data2_ = other.data2_;
       other.data2_ = temp;
-      */
+
     }
 
     void copy(const TMatrix &other, size_t outOffset = 0) {
@@ -147,6 +170,8 @@ class TMatrix : public BaseMatrix {
           other.data(),
           other.shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
     }
 
     void copy(const TMatrix &other, size_t inStart, size_t inLength) {
@@ -155,11 +180,13 @@ class TMatrix : public BaseMatrix {
           other.data() + inStart,
           inLength * sizeof(value_type),
           cudaMemcpyDeviceToDevice) );
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
     }
 
   private:
-    VecType data_;
-    //value_type *data2_;
+    //VecType data_;
+    value_type *data2_;
 
 };
 
