@@ -25,8 +25,8 @@ class TMatrix : public BaseMatrix {
     typedef typename VecType::value_type value_type;
 
     TMatrix()
-    :data2_(NULL)
-    ,owner_(true)
+    //:data2_(NULL)
+    //,owner_(true)
     {
         //std::cerr << "TMatrix(1)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
@@ -35,12 +35,12 @@ class TMatrix : public BaseMatrix {
     TMatrix(const Shape &shape)
     : BaseMatrix(shape)
     //, data_(shape_.elements(), 0.0f)
-    //, data_(shape_.elements())
-    ,owner_(true)
+    , data_(shape_.elements())
+    //,owner_(true)
     {
       cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
 
-      HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
+      //HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       HANDLE_ERROR( cudaMemsetAsync(data(), 0, shape_.elements() * sizeof(value_type), stream) );
 
       //std::cerr << "TMatrix(2)=" << data2_ << " " << shape_.Debug() << std::endl;
@@ -48,12 +48,12 @@ class TMatrix : public BaseMatrix {
 
     TMatrix(TMatrix&& m)
     : BaseMatrix(m)
-    //, data_(std::move(m.data_))
+    , data_(std::move(m.data_))
     //, data_(shape_.elements())
-    ,owner_(true)
+    //,owner_(true)
     {
       cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
-
+      /*
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       HANDLE_ERROR( cudaMemcpyAsync(
           data(),
@@ -61,10 +61,11 @@ class TMatrix : public BaseMatrix {
           shape_.elements() * sizeof(value_type),
           cudaMemcpyDeviceToDevice,
           stream) );
-
+      */
       //std::cerr << "TMatrix(3)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
 
+    /*
     TMatrix(const TMatrix &m, size_t sliceInd)
     :BaseMatrix({m.shape(0), m.shape(1), 1})
     ,owner_(false)
@@ -72,23 +73,26 @@ class TMatrix : public BaseMatrix {
     {
       //std::cerr << "TMatrix(4)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
-
+    */
     TMatrix(const TMatrix& m) = delete;
 
     ~TMatrix() {
       //std::cerr << "destructor=" << data2_ << " " << shape_.Debug() << std::endl;
+      /*
       if (owner_) {
     	  HANDLE_ERROR( cudaFree(data2_) );
       }
+      */
     }
 
     value_type operator()(size_t i, size_t j, size_t k) const {
       value_type ret;
+      ret = data_[k * shape_.numSlices() + i * shape_[1] + j];
+      /*
       const value_type &src = data()[k * shape_.numSlices() + i * shape_[1] + j];
-
       cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
       HANDLE_ERROR( cudaMemcpyAsync(&ret, &src, sizeof(value_type), cudaMemcpyDeviceToHost, stream) );
-
+      */
       return ret;
     }
 
@@ -100,7 +104,8 @@ class TMatrix : public BaseMatrix {
       Reshape(shape);
 
       if (shape_.elements() > oldSize) {
-        //data_.resize(shape_.elements());
+        data_.resize(shape_.elements());
+        /*
         cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
 
         value_type *temp;
@@ -108,6 +113,7 @@ class TMatrix : public BaseMatrix {
         HANDLE_ERROR( cudaFree(data2_) );
 
         data2_ = temp;
+        */
       }
     }
 
@@ -119,7 +125,8 @@ class TMatrix : public BaseMatrix {
       Reshape(shape);
 
       if (shape_.elements() > oldSize) {
-        //data_.resize(shape_.elements());
+        data_.resize(shape_.elements());
+        /*
         cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
 
         value_type *temp;
@@ -132,6 +139,7 @@ class TMatrix : public BaseMatrix {
         HANDLE_ERROR( cudaFree(data2_) );
 
         data2_ = temp;
+        */
       }
     }
 
@@ -152,13 +160,13 @@ class TMatrix : public BaseMatrix {
     }
 
     value_type* data() {
-      //return thrust::raw_pointer_cast(data_.data());
-      return data2_;
+      return thrust::raw_pointer_cast(data_.data());
+      //return data2_;
     }
 
     const value_type* data() const {
-      //return thrust::raw_pointer_cast(data_.data());
-      return data2_;
+      return thrust::raw_pointer_cast(data_.data());
+      //return data2_;
     }
 
     size_t size() const {
@@ -168,12 +176,12 @@ class TMatrix : public BaseMatrix {
     void swap(TMatrix &other) {
       shape_.swap(other.shape_);
 
-      //data_.swap(other.data_);
-
+      data_.swap(other.data_);
+      /*
       value_type *temp = data2_;
       data2_ = other.data2_;
       other.data2_ = temp;
-
+      */
     }
 
     void copy(const TMatrix &other, size_t outOffset = 0) {
@@ -201,9 +209,9 @@ class TMatrix : public BaseMatrix {
     }
 
   private:
-    //VecType data_;
-    value_type *data2_;
-    bool owner_;
+    VecType data_;
+    //value_type *data2_;
+    //bool owner_;
 
 };
 
