@@ -28,7 +28,7 @@ class TMatrix : public BaseMatrix {
     :data2_(NULL)
     ,owner_(true)
     {
-        //std::cerr << "TMatrix(1)=" << data2_ << std::endl;
+        //std::cerr << "TMatrix(1)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
 
     // always init to zero
@@ -43,7 +43,7 @@ class TMatrix : public BaseMatrix {
       HANDLE_ERROR( cudaMalloc(&data2_, shape_.elements() * sizeof(value_type)) );
       HANDLE_ERROR( cudaMemsetAsync(data(), 0, shape_.elements() * sizeof(value_type), stream) );
 
-      //std::cerr << "TMatrix(2)=" << data2_ << std::endl;
+      //std::cerr << "TMatrix(2)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
 
     TMatrix(TMatrix&& m)
@@ -62,7 +62,7 @@ class TMatrix : public BaseMatrix {
           cudaMemcpyDeviceToDevice,
           stream) );
 
-      //std::cerr << "TMatrix(3)=" << data2_ << std::endl;
+      //std::cerr << "TMatrix(3)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
 
     TMatrix(const TMatrix &m, size_t sliceInd)
@@ -70,12 +70,13 @@ class TMatrix : public BaseMatrix {
     ,owner_(false)
     ,data2_(m.data2_ + m.shape_.matrixSize() * sliceInd)
     {
+      //std::cerr << "TMatrix(4)=" << data2_ << " " << shape_.Debug() << std::endl;
     }
 
     TMatrix(const TMatrix& m) = delete;
 
     ~TMatrix() {
-      //std::cerr << "destrucor=" << data2_ << std::endl;
+      //std::cerr << "destructor=" << data2_ << " " << shape_.Debug() << std::endl;
       if (owner_) {
     	  HANDLE_ERROR( cudaFree(data2_) );
       }
@@ -92,6 +93,8 @@ class TMatrix : public BaseMatrix {
     }
 
     void Resize(const Shape &shape) {
+      //std::cerr << "Resize=" << shape_.Debug() << " -> " << shape.Debug() << std::endl;
+
       size_t oldSize = shape_.elements();
 
       Reshape(shape);

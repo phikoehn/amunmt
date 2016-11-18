@@ -153,5 +153,15 @@
           other.shape_[i] = temp;
         }
       }
+
+      std::string Debug() const
+      {
+        std::stringstream strm;
+        strm << shape_[0];
+        for(size_t i = 1; i < numDimensions(); ++i) {
+          strm << "x" << shape_[i];
+        }
+        return strm.str();
+      }
 };
 
