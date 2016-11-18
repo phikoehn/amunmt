@@ -158,22 +158,8 @@ struct Weights {
     const mblas::Matrix B4_;
   };
 
-  Weights(const std::string& npzFile, size_t device = 0)
-  : Weights(NpzConverter(npzFile), device)
-  {}
-
-  Weights(const NpzConverter& model, size_t device = 0)
-  : encEmbeddings_(model),
-    encForwardGRU_(model),
-    encBackwardGRU_(model),
-    decEmbeddings_(model),
-    decInit_(model),
-    decGru1_(model),
-    decGru2_(model),
-    decAlignment_(model),
-    decSoftmax_(model),
-    device_(device)
-    {}
+  Weights(const std::string& npzFile, size_t device = 0);
+  Weights(const NpzConverter& model, size_t device = 0);
 
   size_t GetDevice() {
     return device_;

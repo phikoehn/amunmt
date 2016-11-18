@@ -48,6 +48,7 @@ cuda_add_executable(
   gpu/decoder/encoder_decoder.cu
   gpu/dl4mt/encoder.cu
   gpu/dl4mt/gru.cu
+  gpu/dl4mt/model.cu
   gpu/mblas/matrix_functions.cu
   gpu/mblas/nth_element.cu
   gpu/npz_converter.cu
@@ -67,6 +68,7 @@ cuda_add_library(amunmt SHARED
   gpu/mblas/nth_element.cu
   gpu/dl4mt/encoder.cu
   gpu/dl4mt/gru.cu
+  gpu/dl4mt/model.cu
   gpu/npz_converter.cu
   common/loader_factory.cpp
   $<TARGET_OBJECTS:libcommon>
