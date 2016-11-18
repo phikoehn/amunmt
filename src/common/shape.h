@@ -31,7 +31,7 @@
    * Note: this class currently is hard-coded to 3 dimensions.
    */
 
-  const size_t SHAPE_SIZE = 3;
+  const size_t SHAPE_SIZE = 4;
 
 
   struct Shape {
@@ -52,6 +52,10 @@
        */
       Shape(const std::initializer_list<size_t> &il) {
        std::copy(il.begin(), il.end(), begin());
+
+       for (size_t i = il.size(); i < SHAPE_SIZE; ++i) {
+         shape_[i] = 1;
+       }
       }
 
       Shape(const Shape& shape) {
