@@ -66,7 +66,7 @@ Matrix& Transpose(Matrix& Out, const Matrix& In) {
   size_t m = In.shape(0);
   size_t n = In.shape(1);
 
-  Out.Resize({n, m, In.shape(2)});
+  Out.Reinit({n, m, In.shape(2)});
 
   float alpha = 1.0;
   float beta  = 0.0;
@@ -93,7 +93,7 @@ Matrix& Concat(Matrix& Out, const Matrix& In) {
 }
 
 Matrix& Copy(Matrix& Out, const Matrix& In) {
-  Out.Resize(In.shape());
+  Out.Reinit(In.shape());
 
   Out.copy(In);
   return Out;
@@ -132,7 +132,7 @@ Matrix& CopyRow(Matrix& Out,
                 const Matrix& In,
                 const size_t r, const size_t c) {
   size_t length = In.shape(1) - c;
-  Out.Resize({1, length, 1});
+  Out.Reinit({1, length, 1});
   size_t start = r * In.shape(1) + c;
 
   Out.copy(In, start, length);
@@ -180,7 +180,7 @@ Matrix& CopyRows(Matrix& Out,
 Matrix& Assemble(Matrix& Out,
                  const Matrix& In,
                  const DeviceVector<size_t>& indeces) {
-  Out.Resize({indeces.size(), In.shape(1), 1});
+  Out.Reinit({indeces.size(), In.shape(1), 1});
   CopyRows(Out, In, thrust::raw_pointer_cast(indeces.data()), indeces.size());
   return Out;
 }
@@ -207,7 +207,7 @@ Matrix& Slice(Matrix& Out,
               const Matrix& In,
               size_t n, size_t dim) {
 
-  Out.Resize({In.shape(0), dim, 1});
+  Out.Reinit({In.shape(0), dim, 1});
 
   float* d_out = Out.data();
   const float* d_in = In.data();
@@ -242,7 +242,7 @@ Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
   if(transB)
     ldc = B.shape(0);
 
-  C.Resize({m, n, 1});
+  C.Reinit({m, n, 1});
 
   cublasOperation_t opA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t opB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;

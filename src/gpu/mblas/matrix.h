@@ -92,6 +92,25 @@ class TMatrix : public BaseMatrix {
       return ret;
     }
 
+    void Reinit(const Shape &shape) {
+      //std::cerr << "Reinit=" << shape_.Debug() << " -> " << shape.Debug() << std::endl;
+
+      size_t oldSize = shape_.elements();
+
+      Reshape(shape);
+
+      if (shape_.elements() > oldSize) {
+        //data_.resize(shape_.elements());
+        cudaStream_t &stream = mblas::CudaStreamHandler::GetStream();
+
+        value_type *temp;
+        HANDLE_ERROR( cudaMalloc(&temp, shape_.elements() * sizeof(value_type)) );
+        HANDLE_ERROR( cudaFree(data2_) );
+
+        data2_ = temp;
+      }
+    }
+
     void Resize(const Shape &shape) {
       //std::cerr << "Resize=" << shape_.Debug() << " -> " << shape.Debug() << std::endl;
 
