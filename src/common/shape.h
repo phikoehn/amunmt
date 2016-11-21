@@ -163,5 +163,16 @@
         }
         return strm.str();
       }
+
+      int stride(int i) const {
+        switch(i) {
+          case 0: return shape_[1];
+          case 1: return 1;
+          case 2: return shape_[0] * shape_[1];
+          case 3: return shape_[0] * shape_[1] * shape_[2];
+        }
+        return 1;
+      }
+
 };
 
