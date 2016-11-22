@@ -1,4 +1,5 @@
 #include "TranslationTask.h"
+#include "OutputCollector.h"
 
 using namespace std;
 
