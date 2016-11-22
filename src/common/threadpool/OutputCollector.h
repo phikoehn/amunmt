@@ -19,6 +19,9 @@
 
 #pragma once
 
+#define WITH_THREADS
+#define BOOST_HAS_PTHREADS
+
 #ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
 #endif
