@@ -59,37 +59,14 @@ int main(int argc, char* argv[]) {
     Sentences *sentences = new Sentences();
 
     while(std::getline(God::GetInputStream(), in)) {
-      sentences->emplace_back(taskCounter, in);
-
       boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(in, taskCounter));
       pool2.Submit(task);
 
-      if (sentences->size() >= maxBatchSize) {
-        results.emplace_back(
-          pool.enqueue(
-            [=]{ return TranslationTask(sentences, taskCounter); }
-          )
-        );
-
-        sentences = new Sentences();
-
-        taskCounter++;
-      }
+      taskCounter++;
     }
 
     pool2.Stop(true);
 
-    if (sentences->size()) {
-      results.emplace_back(
-        pool.enqueue(
-          [=]{ return TranslationTask(sentences, taskCounter); }
-        )
-      );
-    }
-
-    size_t lineCounter = 0;
-    for (auto&& result : results)
-      Printer(result.get(), lineCounter++, std::cout);
   }
   LOG(info) << "Total time: " << timer.format();
   God::CleanUp();

@@ -1,5 +1,9 @@
 #include "TranslationTask.h"
 #include "OutputCollector.h"
+#include "common/sentence.h"
+#include "common/search.h"
+#include "common/history.h"
+#include "common/printer.h"
 
 using namespace std;
 
@@ -10,21 +14,26 @@ TranslationTask::TranslationTask(
 		const std::string &line,
 		long translationId)
 {
-  // create mgr
+  translationId_ = translationId;
+  sentence_ = new Sentence(translationId, line);
+
 }
 
 TranslationTask::~TranslationTask()
 {
+  delete sentence_;
 }
 
 void TranslationTask::Run()
 {
-  /*
-    1. process mgr
-    2. output to collectors
-    3. delete mgr
-  */
+  Search search(translationId_);
+  Sentences sentences;
+  sentences.push_back(*sentence_);
+  Histories histories = search.Decode(sentences);
 
+  for (History& history : histories) {
+    Printer(history, translationId_, std::cout);
+  }
 }
 
 }

@@ -2,6 +2,8 @@
 #include <string>
 #include "ThreadPool.h"
 
+class Sentence;
+
 namespace Moses2
 {
 
@@ -14,6 +16,8 @@ public:
   virtual void Run();
 
 protected:
+  Sentence *sentence_;
+  long translationId_;
 };
 
 }
