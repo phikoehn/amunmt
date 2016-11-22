@@ -34,8 +34,6 @@ add_library(libcommon OBJECT
   common/processor/bpe.cpp
   common/utils.cpp
   common/vocab.cpp
-  common/threadpool/ThreadPool.cpp
-  common/threadpool/TranslationTask.cpp
 )
 
 if(CUDA_FOUND)
