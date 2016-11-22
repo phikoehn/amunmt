@@ -13,6 +13,7 @@
 #include "common/exception.h"
 #include "common/translation_task.h"
 #include "common/threadpool/ThreadPool.h"
+#include "common/threadpool/TranslationTask.h"
 
 int main(int argc, char* argv[]) {
   God::Init(argc, argv);
@@ -60,6 +61,9 @@ int main(int argc, char* argv[]) {
     while(std::getline(God::GetInputStream(), in)) {
       sentences->emplace_back(taskCounter, in);
 
+      boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(in, taskCounter));
+      pool2.Submit(task);
+
       if (sentences->size() >= maxBatchSize) {
         results.emplace_back(
           pool.enqueue(
@@ -72,6 +76,8 @@ int main(int argc, char* argv[]) {
         taskCounter++;
       }
     }
+
+    pool2.Stop(true);
 
     if (sentences->size()) {
       results.emplace_back(

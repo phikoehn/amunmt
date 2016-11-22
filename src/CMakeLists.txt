@@ -35,6 +35,7 @@ add_library(libcommon OBJECT
   common/utils.cpp
   common/vocab.cpp
   common/threadpool/ThreadPool.cpp
+  common/threadpool/TranslationTask.cpp
 )
 
 if(CUDA_FOUND)
