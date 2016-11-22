@@ -12,6 +12,7 @@
 #include "common/sentence.h"
 #include "common/exception.h"
 #include "common/translation_task.h"
+#include "common/threadpool/ThreadPool.h"
 
 int main(int argc, char* argv[]) {
   God::Init(argc, argv);
@@ -49,6 +50,8 @@ int main(int argc, char* argv[]) {
     */
   } else {
     ThreadPool pool(totalThreads);
+    Moses2::ThreadPool pool2(totalThreads);
+
     LOG(info) << "Reading input";
 
     std::vector<std::future<Histories>> results;
