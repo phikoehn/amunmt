@@ -12,8 +12,6 @@
 #include "common/sentence.h"
 #include "common/exception.h"
 #include "common/translation_task.h"
-#include "common/threadpool/ThreadPool.h"
-#include "common/threadpool/TranslationTask.h"
 
 int main(int argc, char* argv[]) {
   God::Init(argc, argv);
@@ -42,7 +40,7 @@ int main(int argc, char* argv[]) {
   std::cerr << "maxBatchSize=" << maxBatchSize << std::endl;
 
   if (God::Get<bool>("wipo")) {
-	/*
+  /*
     LOG(info) << "Reading input";
     while (std::getline(God::GetInputStream(), in)) {
       History result = TranslationTask(in, taskCounter);
@@ -51,26 +49,38 @@ int main(int argc, char* argv[]) {
     */
   } else {
     ThreadPool pool(totalThreads);
-    Moses2::ThreadPool pool2(totalThreads);
-
     LOG(info) << "Reading input";
 
     std::vector<std::future<Histories>> results;
     Sentences *sentences = new Sentences();
 
     while(std::getline(God::GetInputStream(), in)) {
-      Sentences *sentences = new Sentences();
-      Sentence sentence(taskCounter, in);
-      sentences->push_back(sentence);
+      sentences->emplace_back(taskCounter, in);
 
-      boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(taskCounter, sentences));
-      pool2.Submit(task);
+      if (sentences->size() >= maxBatchSize) {
+        results.emplace_back(
+          pool.enqueue(
+            [=]{ return TranslationTask(sentences, taskCounter); }
+          )
+        );
 
-      taskCounter++;
+        sentences = new Sentences();
+
+        taskCounter++;
+      }
     }
 
-    pool2.Stop(true);
+    if (sentences->size()) {
+      results.emplace_back(
+        pool.enqueue(
+          [=]{ return TranslationTask(sentences, taskCounter); }
+        )
+      );
+    }
 
+    size_t lineCounter = 0;
+    for (auto&& result : results)
+      Printer(result.get(), lineCounter++, std::cout);
   }
   LOG(info) << "Total time: " << timer.format();
   God::CleanUp();
