@@ -1,6 +1,7 @@
 #include <boost/thread/tss.hpp>
 #include "translation_task.h"
 #include "search.h"
+#include "printer.h"
 
 Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   thread_local std::unique_ptr<Search> search;
@@ -10,9 +11,10 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   }
 
   assert(sentences->size());
-  Histories ret = search->Decode(*sentences);
+  Histories histories = search->Decode(*sentences);
+  Printer(histories, taskCounter, std::cout);
 
   delete sentences;
 
-  return ret;
+  return histories;
 }

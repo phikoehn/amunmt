@@ -58,11 +58,10 @@ int main(int argc, char* argv[]) {
       sentences->emplace_back(taskCounter, in);
 
       if (sentences->size() >= maxBatchSize) {
-        results.emplace_back(
-          pool.enqueue(
+        pool.enqueue(
             [=]{ return TranslationTask(sentences, taskCounter); }
-          )
-        );
+          );
+
 
         sentences = new Sentences();
 
@@ -71,16 +70,11 @@ int main(int argc, char* argv[]) {
     }
 
     if (sentences->size()) {
-      results.emplace_back(
-        pool.enqueue(
+      pool.enqueue(
           [=]{ return TranslationTask(sentences, taskCounter); }
-        )
-      );
+        );
     }
 
-    size_t lineCounter = 0;
-    for (auto&& result : results)
-      Printer(result.get(), lineCounter++, std::cout);
   }
   LOG(info) << "Total time: " << timer.format();
   God::CleanUp();
