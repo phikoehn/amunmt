@@ -4,7 +4,7 @@
 #include "search.h"
 #include "printer.h"
 #include "god.h"
-#include "common/threadpool/OutputCollector.h"
+#include "output_collector.h"
 
 Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   thread_local std::unique_ptr<Search> search;
@@ -18,7 +18,7 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
 
   std::stringstream strm;
   Printer(histories, taskCounter, strm);
-  Moses2::OutputCollector &outputCollector = God::GetOutputCollector();
+  OutputCollector &outputCollector = God::GetOutputCollector();
   outputCollector.Write(taskCounter, strm.str());
 
   delete sentences;

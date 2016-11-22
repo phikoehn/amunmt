@@ -171,7 +171,7 @@ std::istream& God::GetInputStream() {
   return *Summon().inputStream_;
 }
 
-Moses2::OutputCollector& God::GetOutputCollector() {
+OutputCollector& God::GetOutputCollector() {
   return Summon().outputCollector_;
 }
 

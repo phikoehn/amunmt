@@ -22,6 +22,7 @@ void OutputCollector::Write(long sourceId, const std::string& output)
       long currId = iter->first;
 
       if (currId == nextId_) {
+        // 1st element in the map is the next
         const string &currOutput = iter->second;
         *outStrm_ << currOutput << std::flush;
         ++nextId_;
@@ -33,6 +34,7 @@ void OutputCollector::Write(long sourceId, const std::string& output)
         iter = iterNext;
       }
       else {
+        // not the next. stop iterating
         assert(nextId_ < currId);
         break;
       }
