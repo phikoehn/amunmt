@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include "ThreadPool.h"
+#include "common/sentence.h"
 
-class Sentence;
 
 namespace Moses2
 {
@@ -11,13 +11,13 @@ class TranslationTask: public Task
 {
 public:
 
-  TranslationTask(const std::string &line, long translationId);
+  TranslationTask(long translationId, const Sentences *sentences);
   virtual ~TranslationTask();
   virtual void Run();
 
 protected:
-  Sentence *sentence_;
   long translationId_;
+  const Sentences *sentences_;
 };
 
 }

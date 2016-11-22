@@ -10,26 +10,22 @@ using namespace std;
 namespace Moses2
 {
 
-TranslationTask::TranslationTask(
-		const std::string &line,
-		long translationId)
+TranslationTask::TranslationTask(long translationId, const Sentences *sentences)
+:translationId_(translationId)
+,sentences_(sentences)
 {
-  translationId_ = translationId;
-  sentence_ = new Sentence(translationId, line);
 
 }
 
 TranslationTask::~TranslationTask()
 {
-  delete sentence_;
+  delete sentences_;
 }
 
 void TranslationTask::Run()
 {
   Search search(translationId_);
-  Sentences sentences;
-  sentences.push_back(*sentence_);
-  Histories histories = search.Decode(sentences);
+  Histories histories = search.Decode(*sentences_);
 
   for (History& history : histories) {
     Printer(history, translationId_, std::cout);

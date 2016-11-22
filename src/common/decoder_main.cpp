@@ -59,7 +59,11 @@ int main(int argc, char* argv[]) {
     Sentences *sentences = new Sentences();
 
     while(std::getline(God::GetInputStream(), in)) {
-      boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(in, taskCounter));
+      Sentences *sentences = new Sentences();
+      Sentence sentence(taskCounter, in);
+      sentences->push_back(sentence);
+
+      boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(taskCounter, sentences));
       pool2.Submit(task);
 
       taskCounter++;
