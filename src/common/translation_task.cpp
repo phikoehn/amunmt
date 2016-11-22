@@ -1,7 +1,10 @@
+#include <sstream>
 #include <boost/thread/tss.hpp>
 #include "translation_task.h"
 #include "search.h"
 #include "printer.h"
+#include "god.h"
+#include "common/threadpool/OutputCollector.h"
 
 Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   thread_local std::unique_ptr<Search> search;
@@ -12,7 +15,11 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
 
   assert(sentences->size());
   Histories histories = search->Decode(*sentences);
-  Printer(histories, taskCounter, std::cout);
+
+  std::stringstream strm;
+  Printer(histories, taskCounter, strm);
+  Moses2::OutputCollector &outputCollector = God::GetOutputCollector();
+  outputCollector.Write(taskCounter, strm.str());
 
   delete sentences;
 

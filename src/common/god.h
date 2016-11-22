@@ -9,6 +9,7 @@
 #include "common/types.h"
 #include "common/processor/processor.h"
 #include "common/base_best_hyps.h"
+#include "common/threadpool/OutputCollector.h"
 
 class Weights;
 class Vocab;
@@ -43,6 +44,7 @@ class God {
     static Vocab& GetTargetVocab();
 
     static std::istream& GetInputStream();
+    static Moses2::OutputCollector& GetOutputCollector();
 
     static Filter& GetFilter();
 
@@ -85,4 +87,7 @@ class God {
     std::shared_ptr<spdlog::logger> progress_;
 
     std::unique_ptr<InputFileStream> inputStream_;
+
+    Moses2::OutputCollector outputCollector_;
+
 };
