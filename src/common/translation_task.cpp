@@ -6,7 +6,7 @@
 #include "god.h"
 #include "output_collector.h"
 
-Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
+void TranslationTask(const Sentences *sentences, size_t taskCounter) {
   thread_local std::unique_ptr<Search> search;
   if(!search) {
     LOG(info) << "Created Search for thread " << std::this_thread::get_id();
@@ -22,6 +22,4 @@ Histories TranslationTask(const Sentences *sentences, size_t taskCounter) {
   outputCollector.Write(taskCounter, strm.str());
 
   delete sentences;
-
-  return histories;
 }

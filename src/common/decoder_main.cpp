@@ -51,7 +51,6 @@ int main(int argc, char* argv[]) {
     ThreadPool pool(totalThreads);
     LOG(info) << "Reading input";
 
-    std::vector<std::future<Histories>> results;
     Sentences *sentences = new Sentences();
 
     while(std::getline(God::GetInputStream(), in)) {
