@@ -33,14 +33,14 @@ class ApePenalty : public Scorer {
                const Penalties& penalties);
 
     // @TODO: make this work on GPU
-    virtual void SetSource(const Sentence& source);
+    virtual void SetSource(const Sentences& sources);
 
     // @TODO: make this work on GPU
     virtual void Score(const State& in, State& out);
 
     virtual State* NewState();
 
-    virtual void BeginSentenceState(State& state);
+    virtual void BeginSentenceState(State& state, size_t batchSize=1);
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,

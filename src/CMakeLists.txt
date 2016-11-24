@@ -45,7 +45,7 @@ set_source_files_properties( common/loader_factory.cpp
 cuda_add_executable(
   amun
   common/decoder_main.cpp
-  # gpu/decoder/ape_penalty.cu
+  gpu/decoder/ape_penalty.cu
   gpu/decoder/encoder_decoder.cu
   gpu/dl4mt/encoder.cu
   gpu/dl4mt/gru.cu
@@ -63,7 +63,7 @@ cuda_add_executable(
 
 cuda_add_library(amunmt SHARED
   # python/amunmt.cpp
-  # gpu/decoder/ape_penalty.cu
+  gpu/decoder/ape_penalty.cu
   gpu/decoder/encoder_decoder.cu
   gpu/mblas/matrix_functions.cu
   gpu/mblas/nth_element.cu

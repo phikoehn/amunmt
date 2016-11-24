@@ -7,7 +7,7 @@
 
 #ifdef CUDA
 #include "gpu/decoder/encoder_decoder.h"
-// #include "gpu/decoder/ape_penalty.h"
+ #include "gpu/decoder/ape_penalty.h"
 
 #ifdef KENLM
 #include "gpu/decoder/language_model.h"
@@ -52,9 +52,9 @@ Loader *LoaderFactory::CreateGPU(
   IF_MATCH_RETURN(type, "nematus", GPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(type, "NEMATUS", GPU::EncoderDecoderLoader);
 
-  // IF_MATCH_RETURN(type, "Ape", GPU::ApePenaltyLoader);
-  // IF_MATCH_RETURN(type, "ape", GPU::ApePenaltyLoader);
-  // IF_MATCH_RETURN(type, "APE", GPU::ApePenaltyLoader);
+  IF_MATCH_RETURN(type, "Ape", GPU::ApePenaltyLoader);
+  IF_MATCH_RETURN(type, "ape", GPU::ApePenaltyLoader);
+  IF_MATCH_RETURN(type, "APE", GPU::ApePenaltyLoader);
 
 #ifdef KENLM
   IF_MATCH_RETURN(type, "KenLM", GPU::KenLMLoader)

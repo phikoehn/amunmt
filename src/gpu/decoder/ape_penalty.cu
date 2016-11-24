@@ -16,7 +16,10 @@ ApePenalty::ApePenalty(const std::string& name,
 {}
 
 // @TODO: make this work on GPU
-void ApePenalty::SetSource(const Sentence& source) {
+void ApePenalty::SetSource(const Sentences& sources) {
+  assert(sources.size() == 1);
+  const Sentence &source = sources.at(0);
+
   const Words& words = source.GetWords(tab_);
 
   costs_.clear();
@@ -43,7 +46,7 @@ State* ApePenalty::NewState() {
   return new ApePenaltyState();
 }
 
-void ApePenalty::BeginSentenceState(State& state) { }
+void ApePenalty::BeginSentenceState(State& state, size_t batchSize) { }
 
 void ApePenalty::AssembleBeamState(const State& in,
 							   const Beam& beam,
