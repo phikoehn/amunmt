@@ -3,6 +3,8 @@
 #include "common/types.h"
 #include "common/soft_alignment.h"
 
+namespace amunmt {
+
 class Hypothesis;
 
 typedef std::shared_ptr<Hypothesis> HypothesisPtr;
@@ -71,5 +73,9 @@ class Hypothesis {
 };
 
 typedef std::vector<HypothesisPtr> Beam;
+typedef std::vector<Beam> Beams;
 typedef std::pair<Words, HypothesisPtr> Result;
 typedef std::vector<Result> NBestList;
+
+}
+

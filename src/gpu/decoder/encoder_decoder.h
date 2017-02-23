@@ -10,6 +10,7 @@
 #include "gpu/types-gpu.h"
 
 
+namespace amunmt {
 namespace GPU {
 
 class EncoderDecoderState;
@@ -29,18 +30,19 @@ class EncoderDecoder : public Scorer {
     typedef EncoderDecoderState EDState;
 
   public:
-    EncoderDecoder(const std::string& name,
+    EncoderDecoder(const God &god,
+    			   const std::string& name,
                    const YAML::Node& config,
                    size_t tab,
                    const Weights& model);
 
-    virtual void Score(const State& in, State& out);
+    virtual void Decode(const God &god, const State& in, State& out, const std::vector<size_t>& beamSizes);
 
-    virtual State* NewState();
+    virtual State* NewState() const;
 
-    virtual void BeginSentenceState(State& state);
+    virtual void BeginSentenceState(State& state, size_t batchSize=1);
 
-    virtual void SetSource(const Sentence& source);
+    virtual void SetSource(const Sentences& source);
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,
@@ -61,24 +63,31 @@ class EncoderDecoder : public Scorer {
     const Weights& model_;
     std::unique_ptr<Encoder> encoder_;
     std::unique_ptr<Decoder> decoder_;
-    DeviceVector<size_t> indeces_;
+    DeviceVector<size_t> indices_;
+    DeviceVector<int> batchMapping_;
 
     std::unique_ptr<mblas::Matrix> SourceContext_;
+
+    EncoderDecoder(const EncoderDecoder&) = delete;
 };
 
 ////////////////////////////////////////////
 class EncoderDecoderLoader : public Loader {
   public:
+    EncoderDecoderLoader(const EncoderDecoderLoader&) = delete;
     EncoderDecoderLoader(const std::string name,
                          const YAML::Node& config);
+    virtual ~EncoderDecoderLoader();
+    
+    virtual void Load(const God &god);
 
-    virtual void Load();
-
-    virtual ScorerPtr NewScorer(size_t taskId);
-    virtual BestHypsType GetBestHyps();
+    virtual ScorerPtr NewScorer(const God &god, const DeviceInfo &deviceInfo) const;
+    virtual BestHypsBasePtr GetBestHyps(const God &god) const;
 
   private:
-    std::vector<std::unique_ptr<Weights>> weights_;
+    std::vector<std::unique_ptr<Weights>> weights_; // MUST be indexed by gpu id. eg. weights_[2] is for gpu2
 };
 
 }
+}
+

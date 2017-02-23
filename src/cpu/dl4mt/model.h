@@ -8,6 +8,7 @@
 
 #include "../mblas/matrix.h"
 
+namespace amunmt {
 namespace CPU {
 
 struct Weights {
@@ -85,7 +86,7 @@ struct Weights {
   Weights(const NpzConverter& model, size_t device = 0);
 
   size_t GetDevice() {
-    return 0;
+    return std::numeric_limits<size_t>::max();
   }
 
   const Embeddings encEmbeddings_;
@@ -182,5 +183,6 @@ inline std::ostream& operator<<(std::ostream &out, const Weights &obj)
 	return out;
 }
 
+}
 }
 

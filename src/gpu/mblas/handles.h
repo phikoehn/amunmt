@@ -3,15 +3,18 @@
 #include <cuda.h>
 #include <cublas_v2.h>
 
+namespace amunmt {
 namespace GPU {
 namespace mblas {
 
 class CudaStreamHandler {
     CudaStreamHandler()
     : stream_(new cudaStream_t()) {
-      cudaStreamCreate(stream_.get());
+      HANDLE_ERROR( cudaStreamCreate(stream_.get()));
       // cudaStreamCreateWithFlags(stream_.get(), cudaStreamNonBlocking);
     }
+
+    CudaStreamHandler(const CudaStreamHandler&) = delete;
 
   protected:
     static thread_local CudaStreamHandler *instance_;
@@ -26,7 +29,7 @@ class CudaStreamHandler {
     }
 
     virtual ~CudaStreamHandler() {
-        cudaStreamDestroy(*stream_);
+      HANDLE_ERROR(cudaStreamDestroy(*stream_));
     }
 };
 
@@ -34,14 +37,6 @@ class CudaStreamHandler {
 class CublasHandler {
   public:
     static cublasHandle_t GetHandle() {
-#ifdef __APPLE__
-      cublasHandle_t *handle = handle_.get();
-      if (handle == nullptr) {
-        handle = new cublasHandle_t;
-        handle_.reset(handle);
-      }
-      return *handle;
-#else
       if(handle_ == nullptr) {
         assert(handle_ == nullptr);
         handle_ = new cublasHandle_t;
@@ -49,7 +44,6 @@ class CublasHandler {
         cublasSetStream(*handle_, CudaStreamHandler::GetStream());
       }
       return *handle_;
-#endif
     }
 
   private:
@@ -60,12 +54,9 @@ class CublasHandler {
       }
     }
 
-#ifdef __APPLE__
-    static boost::thread_specific_ptr<cublasHandle_t> handle_;
-#else
     static thread_local cublasHandle_t* handle_;
-#endif
 };
 
 } // namespace mblas
 } // namespace GPU
+}

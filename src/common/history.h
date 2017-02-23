@@ -5,6 +5,8 @@
 #include "god.h"
 #include "hypothesis.h"
 
+namespace amunmt {
+
 class History {
   private:
     struct HypothesisCoord {
@@ -17,10 +19,10 @@ class History {
       float cost;
     };
 
+    History(const God &god, const History &) = delete;
+
   public:
-    History()
-    :normalize_(God::Get<bool>("normalize"))
-    {}
+    History(const God &god, size_t lineNo);
 
     void Add(const Beam& beam, bool last = false) {
       if (beam.back()->GetPrevHyp() != nullptr) {
@@ -64,8 +66,39 @@ class History {
       return NBest(1)[0];
     }
 
+    size_t GetLineNum() const
+    { return lineNo_; }
+
   private:
     std::vector<Beam> history_;
     std::priority_queue<HypothesisCoord> topHyps_;
     bool normalize_;
+    size_t lineNo_;
+
 };
+
+///////////////////////////////////////////////////////////////////////////////
+//typedef std::vector<History> Histories;
+class Histories {
+ public:
+  Histories() {} // for all histories in translation task
+  Histories(const God &god, const Sentences& sentences);
+
+  std::shared_ptr<History> at(size_t id) const {
+    return coll_.at(id);
+  }
+
+  size_t size() const {
+    return coll_.size();
+  }
+
+  void SortByLineNum();
+  void Append(const Histories &other);
+
+ protected:
+  std::vector< std::shared_ptr<History> > coll_;
+
+  Histories(const Histories &) = delete;
+};
+
+}

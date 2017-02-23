@@ -9,6 +9,8 @@
 #include "common/logging.h"
 #include "common/base_best_hyps.h"
 
+namespace amunmt {
+
 namespace CPU {
 
 class Weights;
@@ -18,13 +20,14 @@ class EncoderDecoderLoader : public Loader {
     EncoderDecoderLoader(const std::string name,
                          const YAML::Node& config);
 
-    virtual void Load();
+    virtual void Load(const God &god);
 
-    virtual ScorerPtr NewScorer(const size_t taskId);
-    BestHypsType GetBestHyps();
+    virtual ScorerPtr NewScorer(const God &god, const DeviceInfo &deviceInfo) const;
+    BestHypsBasePtr GetBestHyps(const God &god) const;
 
   private:
     std::vector<std::unique_ptr<Weights>> weights_;
 };
 
 } // namespace CPU
+}

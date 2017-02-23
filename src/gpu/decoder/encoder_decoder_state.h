@@ -5,10 +5,14 @@
 
 #include "gpu/mblas/matrix.h"
 
+namespace amunmt {
 namespace GPU {
 
 class EncoderDecoderState : public State {
   public:
+	EncoderDecoderState(const EncoderDecoderState&) = delete;
+	EncoderDecoderState() {}
+
     virtual std::string Debug() const;
 
     mblas::Matrix& GetStates();
@@ -21,4 +25,5 @@ class EncoderDecoderState : public State {
     mblas::Matrix embeddings_;
 };
 
+}
 }  // namespace GPU

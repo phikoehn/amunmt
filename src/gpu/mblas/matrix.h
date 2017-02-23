@@ -5,13 +5,9 @@
 
 #include "common/base_matrix.h"
 
-#ifdef __APPLE__
-#include <boost/thread/tss.hpp>
-#include <boost/pool/object_pool.hpp>
-#endif
-
 #include "gpu/types-gpu.h"
 
+namespace amunmt {
 namespace GPU {
 namespace mblas {
 
@@ -148,3 +144,4 @@ typedef TMatrix<DeviceVector<int>> IMatrix;
 
 }  // namespace mblas
 }  // namespace GPU
+}

@@ -6,6 +6,7 @@
 #include "gpu/mblas/matrix.h"
 #include "gpu/npz_converter.h"
 
+namespace amunmt {
 namespace GPU {
 
 struct Weights {
@@ -13,6 +14,8 @@ struct Weights {
   //////////////////////////////////////////////////////////////////////////////
 
   struct EncEmbeddings {
+    EncEmbeddings(const EncEmbeddings&) = delete;
+
     EncEmbeddings(const NpzConverter& model)
     : E_(model["Wemb"])
     {}
@@ -21,6 +24,8 @@ struct Weights {
   };
 
   struct EncForwardGRU {
+    EncForwardGRU(const EncForwardGRU&) = delete;
+
     EncForwardGRU(const NpzConverter& model)
     : W_(model["encoder_W"]),
       B_(model("encoder_b", true)),
@@ -41,6 +46,8 @@ struct Weights {
   };
 
   struct EncBackwardGRU {
+    EncBackwardGRU(const EncBackwardGRU&) = delete;
+
     EncBackwardGRU(const NpzConverter& model)
     : W_(model["encoder_r_W"]),
       B_(model("encoder_r_b", true)),
@@ -63,6 +70,8 @@ struct Weights {
   //////////////////////////////////////////////////////////////////////////////
 
   struct DecEmbeddings {
+    DecEmbeddings(const DecEmbeddings&) = delete;
+
     DecEmbeddings(const NpzConverter& model)
     : E_(model["Wemb_dec"])
     {}
@@ -71,6 +80,8 @@ struct Weights {
   };
 
   struct DecInit {
+    DecInit(const DecInit&) = delete;
+
     DecInit(const NpzConverter& model)
     : Wi_(model["ff_state_W"]),
       Bi_(model("ff_state_b", true))
@@ -81,6 +92,8 @@ struct Weights {
   };
 
   struct DecGRU1 {
+    DecGRU1(const DecGRU1&) = delete;
+
     DecGRU1(const NpzConverter& model)
     : W_(model["decoder_W"]),
       B_(model("decoder_b", true)),
@@ -101,6 +114,8 @@ struct Weights {
   };
 
   struct DecGRU2 {
+    DecGRU2(const DecGRU2&) = delete;
+
     DecGRU2(const NpzConverter& model)
     : W_(model["decoder_Wc"]),
       B_(model("decoder_b_nl", true)),
@@ -121,6 +136,8 @@ struct Weights {
   };
 
   struct DecAlignment {
+    DecAlignment(const DecAlignment&) = delete;
+
     DecAlignment(const NpzConverter& model)
     : V_(model("decoder_U_att", true)),
       W_(model["decoder_W_comb_att"]),
@@ -137,6 +154,8 @@ struct Weights {
   };
 
   struct DecSoftmax {
+    DecSoftmax(const DecSoftmax&) = delete;
+
     DecSoftmax(const NpzConverter& model)
     : W1_(model["ff_logit_lstm_W"]),
       B1_(model("ff_logit_lstm_b", true)),
@@ -158,11 +177,11 @@ struct Weights {
     const mblas::Matrix B4_;
   };
 
-  Weights(const std::string& npzFile, size_t device = 0)
+  Weights(const std::string& npzFile, size_t device)
   : Weights(NpzConverter(npzFile), device)
   {}
 
-  Weights(const NpzConverter& model, size_t device = 0)
+  Weights(const NpzConverter& model, size_t device)
   : encEmbeddings_(model),
     encForwardGRU_(model),
     encBackwardGRU_(model),
@@ -174,6 +193,8 @@ struct Weights {
     decSoftmax_(model),
     device_(device)
     {}
+
+  Weights(const Weights&) = delete;
 
   size_t GetDevice() {
     return device_;
@@ -193,4 +214,6 @@ struct Weights {
 };
 
 }
+}
+
 

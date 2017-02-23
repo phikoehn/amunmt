@@ -18,6 +18,8 @@
 
 using namespace std;
 
+namespace amunmt {
+
 namespace CPU {
 
 using EDState = EncoderDecoderState;
@@ -60,26 +62,26 @@ EncoderDecoder::EncoderDecoder(const std::string& name,
     decoder_(new CPU::Decoder(model_))
 {}
 
-void EncoderDecoder::Score(const State& in, State& out) {
+void EncoderDecoder::Decode(const God &god, const State& in, State& out, const std::vector<size_t>&) {
   const EDState& edIn = in.get<EDState>();
   EDState& edOut = out.get<EDState>();
 
-  decoder_->MakeStep(edOut.GetStates(), edIn.GetStates(),
+  decoder_->Decode(edOut.GetStates(), edIn.GetStates(),
                      edIn.GetEmbeddings(), SourceContext_);
 }
 
-State* EncoderDecoder::NewState() {
+State* EncoderDecoder::NewState() const {
   return new EDState();
 }
 
-void EncoderDecoder::BeginSentenceState(State& state) {
+void EncoderDecoder::BeginSentenceState(State& state, size_t batchSize) {
   EDState& edState = state.get<EDState>();
-  decoder_->EmptyState(edState.GetStates(), SourceContext_, 1);
-  decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
+  decoder_->EmptyState(edState.GetStates(), SourceContext_, batchSize);
+  decoder_->EmptyEmbedding(edState.GetEmbeddings(), batchSize);
 }
 
-void EncoderDecoder::SetSource(const Sentence& source) {
-  encoder_->GetContext(source.GetWords(tab_),
+void EncoderDecoder::SetSource(const Sentences& sources) {
+  encoder_->GetContext(sources.at(0)->GetWords(tab_),
                         SourceContext_);
 }
 
@@ -134,21 +136,23 @@ EncoderDecoderLoader::EncoderDecoderLoader(const std::string name,
                                            const YAML::Node& config)
   : Loader(name, config) {}
 
-void EncoderDecoderLoader::Load() {
+void EncoderDecoderLoader::Load(const God &god) {
   std::string path = Get<std::string>("path");
 
   LOG(info) << "Loading model " << path;
   weights_.emplace_back(new Weights(path, 0));
 }
 
-ScorerPtr EncoderDecoderLoader::NewScorer(const size_t) {
+ScorerPtr EncoderDecoderLoader::NewScorer(const God &god, const DeviceInfo &deviceInfo) const {
   size_t tab = Has("tab") ? Get<size_t>("tab") : 0;
   return ScorerPtr(new EncoderDecoder(name_, config_,
                                       tab, *weights_[0]));
 }
 
-BestHypsType EncoderDecoderLoader::GetBestHyps() {
-  return CPU::BestHyps;
+BestHypsBasePtr EncoderDecoderLoader::GetBestHyps(const God &god) const {
+  return BestHypsBasePtr(new CPU::BestHyps());
+}
+
 }
 
 }

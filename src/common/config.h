@@ -5,6 +5,8 @@
 
 #include "logging.h"
 
+namespace amunmt {
+
 class Config {
   private:
     YAML::Node config_;
@@ -12,18 +14,16 @@ class Config {
   public:
     std::string inputPath;
 
-    bool Has(const std::string& key);
+    bool Has(const std::string& key) const;
     
-    YAML::Node Get(const std::string& key) {
-      return config_[key];
-    }
+    YAML::Node Get(const std::string& key) const;
     
     template <typename T>
-    T Get(const std::string& key) {
+    T Get(const std::string& key) const {
       return config_[key].as<T>();
     }
     
-    YAML::Node& Get();
+    const YAML::Node& Get() const;
     
     void AddOptions(size_t argc, char** argv);
     
@@ -35,3 +35,6 @@ class Config {
     
     void LogOptions();
 };
+
+}
+

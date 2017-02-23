@@ -5,6 +5,8 @@
 #include <memory>
 #include "common/types.h"
 
+namespace amunmt {
+
 class Hypothesis;
 typedef std::shared_ptr<Hypothesis> HypothesisPtr;
 typedef std::vector<HypothesisPtr> Beam;
@@ -14,6 +16,8 @@ typedef std::shared_ptr<Scorer> ScorerPtr;
 
 class BaseMatrix {
   public:
+	BaseMatrix() {}
+	BaseMatrix(const BaseMatrix&) = delete;
     virtual ~BaseMatrix() {}
 
     virtual size_t Rows() const = 0;
@@ -22,3 +26,6 @@ class BaseMatrix {
 
     virtual std::string Debug() const = 0;
 };
+
+}
+

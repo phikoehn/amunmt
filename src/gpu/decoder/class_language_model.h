@@ -4,6 +4,7 @@
 
 #include "language_model.h"
 
+namespace amunmt {
 namespace GPU {
 
 class ClassLanguageModel : public LanguageModel {
@@ -18,7 +19,7 @@ class ClassLanguageModel : public LanguageModel {
       classes_(LoadClasses(classPath))
     {}
     
-    virtual void Score(const State& in,
+    virtual void Score(const God &god, const State& in,
                        Prob& prob,
                        State& out) {
       
@@ -41,8 +42,8 @@ class ClassLanguageModel : public LanguageModel {
       }
       
       {  
-        ThreadPool pool(God::Get<size_t>("kenlm-batch-threads")); 
-        size_t batchSize = God::Get<size_t>("kenlm-batch-size"); 
+        ThreadPool pool(god.Get<size_t>("kenlm-batch-threads"));
+        size_t batchSize = god.Get<size_t>("kenlm-batch-size");
         for(size_t batchStart = 0; batchStart < lm_.size(); batchStart += batchSize) {
           auto call = [batchStart, batchSize, cols, this, &costs, &inStates, &outStates] {
             size_t batchEnd = min(batchStart + batchSize, lm_.size());
@@ -60,4 +61,5 @@ class ClassLanguageModel : public LanguageModel {
     std::vector<std::vector<Word>> classes_;
 };
 
+}
 }

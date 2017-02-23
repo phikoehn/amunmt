@@ -10,6 +10,7 @@
 
 using namespace std;
 
+namespace amunmt {
 namespace GPU {
 
 ////////////////////////////////////////////
@@ -36,40 +37,44 @@ const mblas::Matrix& EncoderDecoderState::GetEmbeddings() const {
 
 ////////////////////////////////////////////
 
-EncoderDecoder::EncoderDecoder(const std::string& name,
-               const YAML::Node& config,
-               size_t tab,
-               const Weights& model)
+EncoderDecoder::EncoderDecoder(
+		const God &god,
+		const std::string& name,
+        const YAML::Node& config,
+        size_t tab,
+        const Weights& model)
   : Scorer(name, config, tab),
     model_(model),
     encoder_(new Encoder(model_)),
-    decoder_(new Decoder(model_)),
-    indeces_(God::Get<size_t>("beam-size")),
+    decoder_(new Decoder(god, model_)),
+    indices_(god.Get<size_t>("beam-size")),
     SourceContext_(new mblas::Matrix())
 {}
 
-void EncoderDecoder::Score(const State& in,State& out) {
+void EncoderDecoder::Decode(const God &god, const State& in, State& out, const std::vector<size_t>& beamSizes) {
   const EDState& edIn = in.get<EDState>();
   EDState& edOut = out.get<EDState>();
 
-  decoder_->MakeStep(edOut.GetStates(),
+  decoder_->Decode(edOut.GetStates(),
                      edIn.GetStates(),
                      edIn.GetEmbeddings(),
-                     *SourceContext_);
+                     *SourceContext_,
+                     batchMapping_,
+                     beamSizes);
 }
 
-State* EncoderDecoder::NewState() {
+State* EncoderDecoder::NewState() const {
   return new EDState();
 }
 
-void EncoderDecoder::BeginSentenceState(State& state) {
+void EncoderDecoder::BeginSentenceState(State& state, size_t batchSize) {
   EDState& edState = state.get<EDState>();
-  decoder_->EmptyState(edState.GetStates(), *SourceContext_, 1);
-  decoder_->EmptyEmbedding(edState.GetEmbeddings(), 1);
+  decoder_->EmptyState(edState.GetStates(), *SourceContext_, batchSize, batchMapping_);
+  decoder_->EmptyEmbedding(edState.GetEmbeddings(), batchSize);
 }
 
-void EncoderDecoder::SetSource(const Sentence& source) {
-  encoder_->GetContext(source.GetWords(tab_), *SourceContext_);
+void EncoderDecoder::SetSource(const Sentences& source) {
+  encoder_->GetContext(source, tab_, *SourceContext_, batchMapping_);
 }
 
 void EncoderDecoder::AssembleBeamState(const State& in,
@@ -77,18 +82,18 @@ void EncoderDecoder::AssembleBeamState(const State& in,
                                State& out) {
   std::vector<size_t> beamWords;
   std::vector<size_t> beamStateIds;
-  for(auto h : beam) {
+  for (auto h : beam) {
      beamWords.push_back(h->GetWord());
      beamStateIds.push_back(h->GetPrevStateIndex());
   }
 
   const EDState& edIn = in.get<EDState>();
   EDState& edOut = out.get<EDState>();
-  indeces_.resize(beamStateIds.size());
+  indices_.resize(beamStateIds.size());
   thrust::host_vector<size_t> tmp = beamStateIds;
-  mblas::copy_n(tmp.begin(), beamStateIds.size(), indeces_.begin());
+  mblas::copy_n(tmp.begin(), beamStateIds.size(), indices_.begin());
 
-  mblas::Assemble(edOut.GetStates(), edIn.GetStates(), indeces_);
+  mblas::Assemble(edOut.GetStates(), edIn.GetStates(), indices_);
   decoder_->Lookup(edOut.GetEmbeddings(), beamWords);
 }
 
@@ -119,35 +124,55 @@ EncoderDecoderLoader::EncoderDecoderLoader(const std::string name,
                      const YAML::Node& config)
  : Loader(name, config) {}
 
-void EncoderDecoderLoader::Load() {
+void EncoderDecoderLoader::Load(const God &god) {
   std::string path = Get<std::string>("path");
-  auto devices = God::Get<std::vector<size_t>>("devices");
-  ThreadPool devicePool(devices.size());
-  weights_.resize(devices.size());
+  std::vector<size_t> devices = god.Get<std::vector<size_t>>("devices");
 
-  size_t i = 0;
+  size_t maxDeviceId = 0;
+  for (size_t i = 0; i < devices.size(); ++i) {
+    if (devices[i] > maxDeviceId) {
+      maxDeviceId = devices[i];
+    }
+  }
+
+  ThreadPool devicePool(devices.size());
+  weights_.resize(maxDeviceId + 1);
+
   for(auto d : devices) {
-    devicePool.enqueue([i, d, &path, this] {
+    devicePool.enqueue([d, &path, this] {
       LOG(info) << "Loading model " << path << " onto gpu" << d;
-      cudaSetDevice(d);
-      weights_[i].reset(new Weights(path, d));
+      HANDLE_ERROR(cudaSetDevice(d));
+      weights_[d].reset(new Weights(path, d));
     });
-    ++i;
   }
 }
 
-ScorerPtr EncoderDecoderLoader::NewScorer(size_t taskId) {
-  size_t i = taskId % weights_.size();
-  size_t d = weights_[i]->GetDevice();
-  cudaSetDevice(d);
+EncoderDecoderLoader::~EncoderDecoderLoader()
+{
+  for (size_t d = 0; d < weights_.size(); ++d) {
+    const Weights *weights = weights_[d].get();
+    if (weights) {
+      HANDLE_ERROR(cudaSetDevice(d));
+      weights_[d].reset(nullptr);
+    }
+  }
+}
+
+ScorerPtr EncoderDecoderLoader::NewScorer(const God &god, const DeviceInfo &deviceInfo) const {
+  //size_t i = deviceInfo.threadInd;
+  size_t d = deviceInfo.deviceId; // TODO what is not using gpu0?
+  //cerr << "NewScorer=" << i << " " << d << endl;
+
+  HANDLE_ERROR(cudaSetDevice(d));
   size_t tab = Has("tab") ? Get<size_t>("tab") : 0;
-  return ScorerPtr(new EncoderDecoder(name_, config_,
-                                      tab, *weights_[i]));
+  return ScorerPtr(new EncoderDecoder(god, name_, config_,
+                                      tab, *weights_[d]));
 }
 
-BestHypsType EncoderDecoderLoader::GetBestHyps() {
-  return GPU::BestHyps();
+BestHypsBasePtr EncoderDecoderLoader::GetBestHyps(const God &god) const {
+  return BestHypsBasePtr(new GPU::BestHyps(god));
 }
 
+}
 }
 

@@ -6,6 +6,8 @@
 #include "scorer.h"
 #include "common/base_best_hyps.h"
 
+namespace amunmt {
+
 class Loader {
   public:
     Loader(const std::string& name,
@@ -15,21 +17,21 @@ class Loader {
 
     virtual ~Loader() {};
 
-    virtual void Load() = 0;
+    virtual void Load(const God &god) = 0;
 
-    bool Has(const std::string& key) {
+    bool Has(const std::string& key) const {
       return config_[key];
     }
 
     template <typename T>
-    T Get(const std::string& key) {
+    T Get(const std::string& key) const {
       return config_[key].as<T>();
     }
 
-    virtual ScorerPtr NewScorer(size_t) = 0;
-    virtual BestHypsType GetBestHyps() = 0;
+    virtual ScorerPtr NewScorer(const God &god, const DeviceInfo &deviceInfo) const = 0;
+    virtual BestHypsBasePtr GetBestHyps(const God &god) const = 0;
 
-    const std::string& GetName() {
+    const std::string& GetName() const {
       return name_;
     }
 
@@ -39,3 +41,6 @@ class Loader {
 };
 
 typedef std::unique_ptr<Loader> LoaderPtr;
+
+}
+

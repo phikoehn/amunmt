@@ -8,9 +8,15 @@
 #include "common/base_matrix.h"
 #include "yaml-cpp/node/node.h"
 
+namespace amunmt {
+
+class God;
+
 class State {
   public:
-    virtual ~State() {}
+	State() {}
+	State(const State &) = delete;
+	virtual ~State() {}
 
     template <class T>
     T& get() {
@@ -26,7 +32,7 @@ class State {
 
 };
 
-typedef std::unique_ptr<State> StatePtr;
+typedef std::shared_ptr<State> StatePtr;
 typedef std::vector<StatePtr> States;
 
 class Scorer {
@@ -36,20 +42,20 @@ class Scorer {
 
     virtual ~Scorer() {}
 
-    virtual void Score(const State& in,
-                       State& out) = 0;
+    virtual void Decode(const God &god, const State& in,
+                       State& out, const std::vector<size_t>& beamSizes) = 0;
 
-    virtual void BeginSentenceState(State& state) = 0;
+    virtual void BeginSentenceState(State& state, size_t batchSize=1) = 0;
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,
                                    State& out) = 0;
 
-    virtual void SetSource(const Sentence& source) = 0;
+    virtual void SetSource(const Sentences& sources) = 0;
 
     virtual void Filter(const std::vector<size_t>&) = 0;
 
-    virtual State* NewState() = 0;
+    virtual State* NewState() const = 0;
 
     virtual size_t GetVocabSize() const = 0;
 
@@ -75,7 +81,9 @@ class SourceIndependentScorer : public Scorer {
 
     virtual ~SourceIndependentScorer() {}
 
-    virtual void SetSource(const Sentence&) {}
+    virtual void SetSource(const Sentences&) {}
 };
 
 typedef std::shared_ptr<Scorer> ScorerPtr;
+
+}

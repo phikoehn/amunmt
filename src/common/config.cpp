@@ -5,6 +5,8 @@
 #include "common/exception.h"
 #include "common/git_version.h"
 
+namespace amunmt {
+
 #define SET_OPTION(key, type) \
 do { if(!vm_[key].defaulted() || !config_[key]) { \
   config_[key] = vm_[key].as<type>(); \
@@ -15,11 +17,15 @@ do { if(vm_.count(key) > 0) { \
   config_[key] = vm_[key].as<type>(); \
 }} while(0)
 
-bool Config::Has(const std::string& key) {
+bool Config::Has(const std::string& key) const {
   return config_[key];
 }
 
-YAML::Node& Config::Get() {
+YAML::Node Config::Get(const std::string& key) const {
+  return config_[key];
+}
+
+const YAML::Node& Config::Get() const {
   return config_;
 }
 
@@ -81,24 +87,31 @@ void OverwriteBPE(YAML::Node& config, std::vector<std::string>& bpePaths) {
 }
 
 void Validate(const YAML::Node& config) {
-  UTIL_THROW_IF2(!config["scorers"] || config["scorers"].size() == 0,
+  amunmt_UTIL_THROW_IF2(!config["scorers"] || config["scorers"].size() == 0,
                  "No scorers given in config file");
 
-  UTIL_THROW_IF2(!config["source-vocab"],
+  amunmt_UTIL_THROW_IF2(!config["source-vocab"],
                  "No source-vocab given in config file");
 
-  UTIL_THROW_IF2(!config["target-vocab"],
+  amunmt_UTIL_THROW_IF2(!config["target-vocab"],
                  "No target-vocab given in config file");
 
-  UTIL_THROW_IF2(config["weights"].size() != config["scorers"].size(),
+  amunmt_UTIL_THROW_IF2(config["weights"].size() != config["scorers"].size(),
                 "Different number of models and weights in config file");
 
   for(auto&& pair: config["weights"])
-    UTIL_THROW_IF2(!(config["scorers"][pair.first.as<std::string>()]),
+    amunmt_UTIL_THROW_IF2(!(config["scorers"][pair.first.as<std::string>()]),
                    "Weight has no scorer: " << pair.first.as<std::string>());
 
   for(auto&& pair: config["scorers"])
-    UTIL_THROW_IF2(!(config["weights"][pair.first.as<std::string>()]), "Scorer has no weight: " << pair.first.as<std::string>());
+    amunmt_UTIL_THROW_IF2(!(config["weights"][pair.first.as<std::string>()]), "Scorer has no weight: " << pair.first.as<std::string>());
+
+  //amunmt_UTIL_THROW_IF2(config["cpu-threads"].as<int>() > 0 && config["batch-size"].as<int>() > 1,
+  //              "Different number of models and weights in config file");
+
+  amunmt_UTIL_THROW_IF2(config["maxi-batch"].as<int>() < config["mini-batch"].as<int>(),
+                "maxi-batch (" << config["maxi-batch"].as<int>()
+                << ") < mini-batch (" << config["mini-batch"].as<int>() << ")");
 }
 
 void OutputRec(const YAML::Node node, YAML::Emitter& out) {
@@ -192,6 +205,10 @@ void Config::AddOptions(size_t argc, char** argv) {
     ("cpu-threads", po::value<size_t>()->default_value(1),
      "Number of threads on the CPU.")
 #endif
+    ("mini-batch", po::value<size_t>()->default_value(1),
+     "Number of sentences in mini batch.")
+    ("maxi-batch", po::value<size_t>()->default_value(1),
+      "Number of sentences in maxi batch.")
     ("show-weights", po::value<bool>()->zero_tokens()->default_value(false),
      "Output used weights to stdout and exit")
     ("load-weights", po::value<std::string>(),
@@ -200,6 +217,8 @@ void Config::AddOptions(size_t argc, char** argv) {
      "Use WIPO specific n-best-list format and non-buffering single-threading")
     ("return-alignment", po::value<bool>()->zero_tokens()->default_value(false),
      "If true, return alignment.")
+    ("max-length", po::value<size_t>()->default_value(500),
+      "Maximum length of input sentences. Anything above this is truncated. 0=no max length")
     ("version,v", po::value<bool>()->zero_tokens()->default_value(false),
      "Print version.")
     ("help,h", po::value<bool>()->zero_tokens()->default_value(false),
@@ -271,6 +290,9 @@ void Config::AddOptions(size_t argc, char** argv) {
   SET_OPTION("no-debpe", bool);
   SET_OPTION("beam-size", size_t);
   SET_OPTION("cpu-threads", size_t);
+  SET_OPTION("mini-batch", size_t);
+  SET_OPTION("maxi-batch", size_t);
+  SET_OPTION("max-length", size_t);
 #ifdef CUDA
   SET_OPTION("gpu-threads", size_t);
   SET_OPTION("devices", std::vector<size_t>);
@@ -278,6 +300,7 @@ void Config::AddOptions(size_t argc, char** argv) {
   SET_OPTION("show-weights", bool);
   SET_OPTION_NONDEFAULT("load-weights", std::string);
   SET_OPTION("relative-paths", bool);
+  SET_OPTION_NONDEFAULT("input-file", std::string);
 
   // @TODO: Apply complex overwrites
 
@@ -301,7 +324,7 @@ void Config::AddOptions(size_t argc, char** argv) {
     OverwriteBPE(config_, bpePaths);
   }
 
-  if (Get<bool>("relative-paths"))
+  if (Get<bool>("relative-paths") && !vm_["dump-config"].as<bool>())
     ProcessPaths(config_, boost::filesystem::path{configPath}.parent_path(), false);
 
   Validate(config_);
@@ -312,6 +335,7 @@ void Config::AddOptions(size_t argc, char** argv) {
     std::cout << emit.c_str() << std::endl;
     exit(0);
   }
+
 }
 
 void Config::LogOptions() {
@@ -319,4 +343,6 @@ void Config::LogOptions() {
   YAML::Emitter out;
   OutputRec(config_, out);
   LOG(info) << "Options: \n" << out.c_str();
+}
+
 }

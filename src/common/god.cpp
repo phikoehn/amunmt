@@ -12,26 +12,79 @@
 #include "common/filter.h"
 #include "common/processor/bpe.h"
 #include "common/utils.h"
+#include "common/search.h"
 
 #include "scorer.h"
 #include "loader_factory.h"
 
-God God::instance_;
+using namespace std;
 
-God::~God(){}
+namespace amunmt {
+
+God::God()
+ : threadIncr_(0)
+{
+}
+
+God::~God()
+{
+}
 
 God& God::Init(const std::string& options) {
   std::vector<std::string> args = boost::program_options::split_unix(options);
   int argc = args.size() + 1;
   char* argv[argc];
   argv[0] = const_cast<char*>("bogus");
-  for(int i = 1; i < argc; i++)
+  for (int i = 1; i < argc; ++i) {
     argv[i] = const_cast<char*>(args[i-1].c_str());
+  }
   return Init(argc, argv);
 }
 
 God& God::Init(int argc, char** argv) {
-  return Summon().NonStaticInit(argc, argv);
+  info_ = spdlog::stderr_logger_mt("info");
+  info_->set_pattern("[%c] (%L) %v");
+
+  progress_ = spdlog::stderr_logger_mt("progress");
+  progress_->set_pattern("%v");
+
+  config_.AddOptions(argc, argv);
+  config_.LogOptions();
+
+  if (Get("source-vocab").IsSequence()) {
+    for (auto sourceVocabPath : Get<std::vector<std::string>>("source-vocab")) {
+      sourceVocabs_.emplace_back(new Vocab(sourceVocabPath));
+    }
+  } else {
+    sourceVocabs_.emplace_back(new Vocab(Get<std::string>("source-vocab")));
+  }
+  targetVocab_.reset(new Vocab(Get<std::string>("target-vocab")));
+
+  weights_ = Get<std::map<std::string, float>>("weights");
+
+  if(Get<bool>("show-weights")) {
+    LOG(info) << "Outputting weights and exiting";
+    for(auto && pair : weights_) {
+      std::cout << pair.first << "= " << pair.second << std::endl;
+    }
+    exit(0);
+  }
+
+  LoadScorers();
+  LoadFiltering();
+
+  if (Has("input-file")) {
+    LOG(info) << "Reading from " << Get<std::string>("input-file");
+    inputStream_.reset(new InputFileStream(Get<std::string>("input-file")));
+  }
+  else {
+    LOG(info) << "Reading from stdin";
+    inputStream_.reset(new InputFileStream(std::cin));
+  }
+
+  LoadPrePostProcessing();
+
+  return *this;
 }
 
 void God::LoadScorers() {
@@ -42,7 +95,7 @@ void God::LoadScorers() {
   if (gpuThreads > 0 && devices.size() > 0) {
     for (auto&& pair : config_.Get()["scorers"]) {
       std::string name = pair.first.as<std::string>();
-      gpuLoaders_.emplace(name, LoaderFactory::Create(name, pair.second, "GPU"));
+      gpuLoaders_.emplace(name, LoaderFactory::Create(*this, name, pair.second, "GPU"));
     }
   }
 #endif
@@ -50,7 +103,7 @@ void God::LoadScorers() {
   if (cpuThreads) {
     for (auto&& pair : config_.Get()["scorers"]) {
       std::string name = pair.first.as<std::string>();
-      cpuLoaders_.emplace(name, LoaderFactory::Create(name, pair.second, "CPU"));
+      cpuLoaders_.emplace(name, LoaderFactory::Create(*this, name, pair.second, "CPU"));
     }
   }
 }
@@ -109,128 +162,135 @@ void God::LoadPrePostProcessing() {
   }
 }
 
-God& God::NonStaticInit(int argc, char** argv) {
-  info_ = spdlog::stderr_logger_mt("info");
-  info_->set_pattern("[%c] (%L) %v");
-
-  progress_ = spdlog::stderr_logger_mt("progress");
-  progress_->set_pattern("%v");
-
-  config_.AddOptions(argc, argv);
-  config_.LogOptions();
-
-  if(Get("source-vocab").IsSequence()) {
-    for(auto sourceVocabPath : Get<std::vector<std::string>>("source-vocab"))
-      sourceVocabs_.emplace_back(new Vocab(sourceVocabPath));
-  }
-  else {
-    sourceVocabs_.emplace_back(new Vocab(Get<std::string>("source-vocab")));
-  }
-  targetVocab_.reset(new Vocab(Get<std::string>("target-vocab")));
-
-  weights_ = Get<std::map<std::string, float>>("weights");
-
-  if(Get<bool>("show-weights")) {
-    LOG(info) << "Outputting weights and exiting";
-    for(auto && pair : weights_) {
-      std::cout << pair.first << "= " << pair.second << std::endl;
-    }
-    exit(0);
-  }
-
-  LoadScorers();
-  LoadFiltering();
-
-  if (Has("input-file")) {
-    LOG(info) << "Reading from " << Get<std::string>("input-file");
-    inputStream_.reset(new InputFileStream(Get<std::string>("input-file")));
-  }
-  else {
-    LOG(info) << "Reading from stdin";
-    inputStream_.reset(new InputFileStream(std::cin));
-  }
-
-  LoadPrePostProcessing();
-
-  return *this;
+Vocab& God::GetSourceVocab(size_t i) const {
+  return *sourceVocabs_[i];
 }
 
-Vocab& God::GetSourceVocab(size_t i) {
-  return *(Summon().sourceVocabs_[i]);
+Vocab& God::GetTargetVocab() const {
+  return *targetVocab_;
 }
 
-Vocab& God::GetTargetVocab() {
-  return *Summon().targetVocab_;
+const Filter& God::GetFilter() const {
+  return *filter_;
 }
 
-Filter& God::GetFilter() {
-  return *(Summon().filter_);
+std::istream& God::GetInputStream() const {
+  return *inputStream_;
 }
 
-std::istream& God::GetInputStream() {
-  return *Summon().inputStream_;
+OutputCollector& God::GetOutputCollector() const {
+  return outputCollector_;
 }
 
-std::vector<ScorerPtr> God::GetScorers(size_t threadId) {
+std::vector<ScorerPtr> God::GetScorers(const DeviceInfo &deviceInfo) const {
   std::vector<ScorerPtr> scorers;
 
-  size_t cpuThreads = God::Get<size_t>("cpu-threads");
-
-  if (threadId < cpuThreads) {
-    for (auto&& loader : Summon().cpuLoaders_ | boost::adaptors::map_values)
-      scorers.emplace_back(loader->NewScorer(threadId));
+  if (deviceInfo.deviceType == CPUDevice) {
+    for (auto&& loader : cpuLoaders_ | boost::adaptors::map_values)
+      scorers.emplace_back(loader->NewScorer(*this, deviceInfo));
   } else {
-    for (auto&& loader : Summon().gpuLoaders_ | boost::adaptors::map_values)
-      scorers.emplace_back(loader->NewScorer(threadId - cpuThreads));
+    for (auto&& loader : gpuLoaders_ | boost::adaptors::map_values)
+      scorers.emplace_back(loader->NewScorer(*this, deviceInfo));
   }
   return scorers;
 }
 
-BestHypsType God::GetBestHyps(size_t threadId) {
-  size_t cpuThreads = God::Get<size_t>("cpu-threads");
-  if (threadId < cpuThreads) {
-    return Summon().cpuLoaders_.begin()->second->GetBestHyps();
+BestHypsBasePtr God::GetBestHyps(const DeviceInfo &deviceInfo) const {
+  if (deviceInfo.deviceType == CPUDevice) {
+    return cpuLoaders_.begin()->second->GetBestHyps(*this);
   } else {
-    return Summon().gpuLoaders_.begin()->second->GetBestHyps();
+    return gpuLoaders_.begin()->second->GetBestHyps(*this);
   }
 }
 
-std::vector<std::string> God::GetScorerNames() {
+std::vector<std::string> God::GetScorerNames() const {
   std::vector<std::string> scorerNames;
-  for(auto&& name : Summon().cpuLoaders_ | boost::adaptors::map_keys)
+  for(auto&& name : cpuLoaders_ | boost::adaptors::map_keys)
     scorerNames.push_back(name);
-  for(auto&& name : Summon().gpuLoaders_ | boost::adaptors::map_keys)
+  for(auto&& name : gpuLoaders_ | boost::adaptors::map_keys)
     scorerNames.push_back(name);
   return scorerNames;
 }
 
-std::map<std::string, float>& God::GetScorerWeights() {
-  return Summon().weights_;
+const std::map<std::string, float>& God::GetScorerWeights() const {
+  return weights_;
 }
 
-std::vector<std::string> God::Preprocess(size_t i, const std::vector<std::string>& input) {
+std::vector<std::string> God::Preprocess(size_t i, const std::vector<std::string>& input) const {
   std::vector<std::string> processed = input;
-  if (Summon().preprocessors_.size() >= i + 1) {
-    for (const auto& processor : Summon().preprocessors_[i]) {
+  if (preprocessors_.size() >= i + 1) {
+    for (const auto& processor : preprocessors_[i]) {
       processed = processor->Preprocess(processed);
     }
   }
   return processed;
 }
 
-std::vector<std::string> God::Postprocess(const std::vector<std::string>& input) {
+std::vector<std::string> God::Postprocess(const std::vector<std::string>& input) const {
   std::vector<std::string> processed = input;
-  for (const auto& processor : Summon().postprocessors_) {
+  for (const auto& processor : postprocessors_) {
     processed = processor->Postprocess(processed);
   }
   return processed;
 }
-// clean up cuda vectors before cuda context goes out of scope
+
 void God::CleanUp() {
-  for (auto& loader : Summon().cpuLoaders_ | boost::adaptors::map_values) {
-     loader.reset(nullptr);
+  for (Loaders::value_type& loader : cpuLoaders_) {
+     loader.second.reset(nullptr);
   }
-  for (auto& loader : Summon().gpuLoaders_ | boost::adaptors::map_values) {
-     loader.reset(nullptr);
+  for (Loaders::value_type& loader : gpuLoaders_) {
+     loader.second.reset(nullptr);
   }
 }
+
+DeviceInfo God::GetNextDevice() const
+{
+  DeviceInfo ret;
+
+  size_t cpuThreads = God::Get<size_t>("cpu-threads");
+  ret.deviceType = (threadIncr_ < cpuThreads) ? CPUDevice : GPUDevice;
+
+  if (ret.deviceType == CPUDevice) {
+    ret.threadInd = threadIncr_;
+  }
+  else {
+    size_t threadIncrGPU = threadIncr_ - cpuThreads;
+    size_t gpuThreads = Get<size_t>("gpu-threads");
+    std::vector<size_t> devices = Get<std::vector<size_t>>("devices");
+
+    ret.threadInd = threadIncrGPU / devices.size();
+
+    size_t deviceInd = threadIncrGPU % devices.size();
+    assert(deviceInd < devices.size());
+    ret.deviceId = devices[deviceInd];
+
+    amunmt_UTIL_THROW_IF2(ret.threadInd >= gpuThreads, "Too many GPU threads");
+  }
+
+  ++threadIncr_;
+
+  return ret;
+}
+
+Search &God::GetSearch() const
+{
+  Search *obj;
+
+  {
+    boost::shared_lock<boost::shared_mutex> read_lock(accessLock_);
+    obj = search_.get();
+    if (obj) {
+      return *obj;
+    }
+  }
+
+  boost::unique_lock<boost::shared_mutex> lock(accessLock_);
+  obj = new Search(*this);
+  search_.reset(obj);
+
+  assert(obj);
+  return *obj;
+}
+
+}
+

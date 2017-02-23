@@ -8,55 +8,65 @@
 #include "common/vocab.h"
 #include "common/soft_alignment.h"
 
+namespace amunmt {
+
+std::vector<size_t> GetAlignment(const HypothesisPtr& hypothesis);
+
+std::string GetAlignmentString(const std::vector<size_t>& alignment);
+
 template <class OStream>
-void Printer(const History& history, size_t lineNo, OStream& out) {
-  std::string best = Join(God::Postprocess(God::GetTargetVocab()(history.Top().first)));
+void Printer(const God &god, const History& history, OStream& out) {
+  auto bestTranslation = history.Top();
+  std::vector<std::string> bestSentenceWords = god.Postprocess(god.GetTargetVocab()(bestTranslation.first));
+
+  std::string best = Join(bestSentenceWords);
+  if (god.Get<bool>("return-alignment")) {
+    best += GetAlignmentString(GetAlignment(bestTranslation.second));
+  }
   LOG(progress) << "Best translation: " << best;
 
-  // if (God::Get<bool>("return-alignment")) {
-    // auto last = history.Top().second;
-    // std::vector<SoftAlignment> aligns;
-    // while (last->GetPrevHyp().get() != nullptr) {
-      // aligns.push_back(*(last->GetAlignment(0)));
-      // last = last->GetPrevHyp();
-    // }
-    // std::stringstream ss;
-    // for (auto it = aligns.rbegin(); it != aligns.rend(); ++it) {
-      // ss << "(";
-      // for (auto sIt = it->begin(); sIt != it->end(); ++sIt) {
-        // ss << *sIt << " ";
-      // }
-      // ss << ") | ";
-    // }
-    // LOG(progress) << "ALIGN: " << ss.str();
-  // }
-
-  if(God::Get<bool>("n-best")) {
-    std::vector<std::string> scorerNames = God::GetScorerNames();
-    const NBestList &nbl = history.NBest(God::Get<size_t>("beam-size"));
-    if(God::Get<bool>("wipo")) {
+  if (god.Get<bool>("n-best")) {
+    std::vector<std::string> scorerNames = god.GetScorerNames();
+    const NBestList &nbl = history.NBest(god.Get<size_t>("beam-size"));
+    if (god.Get<bool>("wipo")) {
       out << "OUT: " << nbl.size() << std::endl;
     }
-    for(size_t i = 0; i < nbl.size(); ++i) {
+    for (size_t i = 0; i < nbl.size(); ++i) {
       const Result& result = nbl[i];
       const Words &words = result.first;
       const HypothesisPtr &hypo = result.second;
 
-      if(God::Get<bool>("wipo"))
+      if(god.Get<bool>("wipo")) {
         out << "OUT: ";
-      out << lineNo << " ||| " << Join(God::Postprocess(God::GetTargetVocab()(words))) << " |||";
+      }
+      std::string translation = Join(god.Postprocess(god.GetTargetVocab()(words)));
+      if (god.Get<bool>("return-alignment")) {
+        translation += GetAlignmentString(GetAlignment(bestTranslation.second));
+      }
+      out << history.GetLineNum() << " ||| " << translation << " |||";
+
       for(size_t j = 0; j < hypo->GetCostBreakdown().size(); ++j) {
         out << " " << scorerNames[j] << "= " << hypo->GetCostBreakdown()[j];
       }
-      if(God::Get<bool>("normalize")) {
+      if(god.Get<bool>("normalize")) {
         out << " ||| " << hypo->GetCost() / words.size() << std::endl;
       }
       else {
         out << " ||| " << hypo->GetCost() << std::endl;
       }
     }
-  }
-  else {
+  } else {
     out << best << std::endl;
   }
 }
+
+template <class OStream>
+void Printer(const God &god, const Histories& histories, OStream& out) {
+  for (size_t i = 0; i < histories.size(); ++i) {
+    const History& history = *histories.at(i).get();
+    Printer(god, history, out);
+  }
+}
+
+}
+

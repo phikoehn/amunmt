@@ -85,14 +85,14 @@ void ApePenaltyLoader::Load() {
   }
 }
 
-ScorerPtr ApePenaltyLoader::NewScorer(size_t taskId) {
+ScorerPtr ApePenaltyLoader::NewScorer(God &god, size_t taskId) {
   size_t tab = Has("tab") ? Get<size_t>("tab") : 0;
   return ScorerPtr(new ApePenalty(name_, config_, tab,
                                   srcTrgMap_, penalties_));
 }
 
-BestHypsType ApePenaltyLoader::GetBestHyps() {
-  return GPU::BestHyps();
+BestHypsBase *ApePenaltyLoader::GetBestHyps(God &god) {
+  return new GPU::BestHyps();
 }
 
 }

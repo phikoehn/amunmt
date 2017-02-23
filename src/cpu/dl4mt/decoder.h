@@ -5,6 +5,7 @@
 #include "gru.h"
 #include "common/god.h"
 
+namespace amunmt {
 namespace CPU {
 
 class Decoder {
@@ -57,6 +58,7 @@ class Decoder {
           AddBiasVector<byRow>(Temp2_, Temp1_);
 
           State = Temp2_ * w_.Wi_;
+
           AddBiasVector<byRow>(State, w_.Bi_);
 
           State = blaze::forEach(State, Tanh());
@@ -132,7 +134,7 @@ class Decoder {
           float bias = w_.C_(0,0);
           blaze::forEach(A_, [=](float x) { return x + bias; });
 
-          mblas::Softmax(A_);
+          mblas::SafeSoftmax(A_);
           AlignedSourceContext = A_ * SourceContext;
         }
 
@@ -219,7 +221,7 @@ class Decoder {
       softmax_(model.decSoftmax_)
     {}
 
-    void MakeStep(mblas::Matrix& NextState,
+    void Decode(mblas::Matrix& NextState,
                   const mblas::Matrix& State,
                   const mblas::Matrix& Embeddings,
                   const mblas::Matrix& SourceContext) {
@@ -236,8 +238,8 @@ class Decoder {
     void EmptyState(mblas::Matrix& State,
                     const mblas::Matrix& SourceContext,
                     size_t batchSize = 1) {
-      rnn1_.InitializeState(State, SourceContext, batchSize);
-      attention_.Init(SourceContext);
+    	rnn1_.InitializeState(State, SourceContext, batchSize);
+    	attention_.Init(SourceContext);
     }
 
     void EmptyEmbedding(mblas::Matrix& Embedding,
@@ -307,3 +309,5 @@ class Decoder {
 };
 
 }
+}
+
